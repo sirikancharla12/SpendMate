@@ -1,0 +1,30 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+/* global.css or styles.css */
+.background {
+  background-image: url('/up\ \(1\).svg');
+  background-size: cover;      /* Ensures the background covers the element */
+  background-position: center; /* Centers the background */
+       width: max-content;
+       height: max-content;          /* Full screen width */
+}
+
+
+body {
+  color: var(--foreground);
+  background: var(--background);
+  font-family: Arial, Helvetica, sans-serif;
+}

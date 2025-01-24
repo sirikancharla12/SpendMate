@@ -1,0 +1,53 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  name          String?
+  image         String?
+  password      String?  // Optional for users who log in with credentials
+  emailVerified DateTime?
+  provider String @default("credentials")
+  googleId      String? @unique  // Optional if using Google authentication
+  updatedAt     DateTime @updatedAt // Automatically updates on changes
+  accounts      Account[]  // Links to OAuth accounts (like Google)
+  expenses      Expense[]  // One-to-many relation with Expense
+}
+
+model Account {
+  id                 String   @id @default(cuid())
+  userId             String
+  provider           String
+  providerAccountId  String?  // This can store the unique provider account ID
+  providerId         String?  // Optional for existing rows
+  providerType       String?  // Optional for existing rows
+  refresh_token      String? @db.Text
+  access_token       String? @db.Text
+  expires_at         Int?
+  token_type         String?
+  scope              String?
+  id_token           String? @db.Text
+  session_state      String?
+  updatedAt          DateTime? @updatedAt // Automatically updates on changes
+  user               User     @relation(fields: [userId], references: [id])
+
+  @@unique([provider, providerAccountId]) // Ensure the combination of provider and accountId is unique
+}
+
+model Expense {
+  id          Int      @id @default(autoincrement())
+  description String
+  amount      Float
+  category    String
+  type        String
+  date        DateTime 
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+}
