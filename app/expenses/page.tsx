@@ -7,8 +7,25 @@ import Expenses from "app/components/expensescomponent";
 import Sidebar from "app/components/sidebar";
 import Navbar from "app/components/navbar";
 
+interface Transaction {
+  id: string;
+  description: string;
+  amount: number;
+  category: string;
+  type: "Income" | "Expense";
+  date: string;
+  userId: string;
+}
+
+interface ExpensesProps {
+  transactions: Transaction[];
+  setTransactions: React.Dispatch<React.SetStateAction<Transaction[]>>;
+}
+
 const Transactions = () => {
-  const [transactions, setTransactions] = useState([]);
+  // const [transactions, setTransactions] = useState([]);
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const [loading, setLoading] = useState(false);
