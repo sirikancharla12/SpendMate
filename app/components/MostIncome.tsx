@@ -102,8 +102,8 @@ const MostIncome = ({ transactions }: { transactions: Transaction[] }) => {
     }, [incomeCategories, incomeAmounts]);
   
     return (
-      <div>
-        <h1>Income Bar Chart</h1>
+      <div className=" ">
+        <h1 className="font-semibold">Income Bar Chart</h1>
         <canvas ref={chartRef} width={400} height={200}></canvas>
       </div>
     );

@@ -57,27 +57,25 @@ const MostExpenses = ({ transactions }: { transactions: Transaction[] }) => {
   }, [transactions]);
 
   return (
-    <div>
-      <h2>Top 3 Expense Categories</h2>
+    <div className="bg-[#181C3B] py-2 px-2 rounded ">
+      <h2 className=" font-semibold">Top 3 Expense Categories</h2>
       {topExpenses.map((expense, index) => (
         <div
           key={index}
           style={{
             display: "flex",
             alignItems: "center",
-            marginBottom: "1rem",
+            marginBottom: "2px",
             borderRadius: "5px",
-            // backgroundColor:"red",
             padding: "10px",
-            // width:"2/5"
           }}
         >
           <img
             src={categoryImages[expense.category] || "/money.svg"}
             alt={expense.category}
             style={{
-              width: "40px",
-              height: "40px",
+              width: "30px",
+              height: "30px",
               marginRight: "8px",
             }}
           />
@@ -88,28 +86,26 @@ const MostExpenses = ({ transactions }: { transactions: Transaction[] }) => {
                 display: "flex",
                 justifyContent: "space-between",
                 alignItems: "center",
-                marginBottom: "4px",
+                marginBottom: "2px",
                 // width:"full"
               }}
             >
               <span>{capitalize(expense.category)}</span>
-              {/* <span>{`${expense.total.toFixed(2)} USD`}</span> */}
             </div>
 
             <div
               style={{
                 height: "5px",
-                width: "50%",
+                width: "100%",
                 backgroundColor: "#e0e0e0",
                 borderRadius: "5px",
                 overflow: "hidden",
               }}
             >
-              <div
+              <div className="bg-yellow-500"
                 style={{
                   height: "100%",
                   width: `${expense.percentage}%`,
-                  backgroundColor: "#4caf50",
                 }}
               />
             </div>

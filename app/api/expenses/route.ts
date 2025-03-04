@@ -23,6 +23,40 @@ async function getAuthenticatedUser(req: NextRequest) {
   }
   return { user: session.user, status: 200 };
 }
+
+async function duplicateSalaryExpense(existingUserId:string){
+  const today=new Date()
+  const is1stdayofmonth=today.getDate()===1;
+  if(is1stdayofmonth){
+    const salaryamount=await prisma.expense.findFirst({
+      where:{
+        userId:existingUserId,
+        category:"Salary",
+
+      },
+      orderBy:  {
+        date:"desc"
+      }
+    })
+
+
+    if(salaryamount){
+      await prisma.expense.create({
+data: {
+  amount: salaryamount.amount,
+  category: salaryamount.category,
+  description: salaryamount.description,
+  type: "Salary",
+  date: new Date(new Date().setMonth(new Date().getMonth() + 1)),
+  userId: existingUserId,
+  recurringStartDate: new Date()
+}
+      })
+      console.log('Salary expense duplicated for the next month.');
+    }
+  }
+}
+
 export async function POST(req: NextRequest) {
   try {
     const { user, status, message } = await getAuthenticatedUser(req);
@@ -57,13 +91,12 @@ export async function POST(req: NextRequest) {
     if (!existingUser || !existingUser.id) {
       return new NextResponse(JSON.stringify({ error: "User creation failed" }), { status: 500 });
     }
-
-    console.log('User ID:', existingUser.id);
+    await duplicateSalaryExpense(existingUser.id);
 
     const body = await req.json();
-    const { description, amount, category, transactionType, date } = body;
+    const { description, amount, category, type, date } = body;
 
-    if (!description || !amount || !category || !transactionType || !date) {
+    if (!description || !amount || !category || !type || !date) {
       return new NextResponse(JSON.stringify({ error: "Missing required fields in payload" }), { status: 400 });
     }
 
@@ -79,9 +112,10 @@ export async function POST(req: NextRequest) {
         description,
         amount,
         category,
-        type: transactionType,
+        type,
         date: parsedDate,
-        userId: existingUser.id, 
+        userId: existingUser.id,
+        recurringStartDate: new Date(), // Add this line
       },
     });
 
@@ -134,4 +168,5 @@ export async function GET(req: NextRequest) {
     );
   } 
 }
+
 

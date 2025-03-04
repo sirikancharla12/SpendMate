@@ -6,11 +6,18 @@ import axios from "axios";
 import ChartComponent from "./Chartcomponent";
 import Mostexpenses from "./Mostexpenses";
 import MostIncome from "./MostIncome";
+import Savings from "./Savings";
+import ExpensesChart from "./Chartcomponent";
 
-const Workspace = () => {
+
+interface WorkspaceProps {
+  isSidebarOpen: boolean;
+}
+const Workspace = ({ isSidebarOpen }: WorkspaceProps)  => {
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
   const fetchTransactions = async () => {
     setLoading(true);
     try {
@@ -29,27 +36,27 @@ const Workspace = () => {
   }, []);
 
   return (
-    <div className="p-2  display flex  w-full">
-     <div className="w-3/5">
-     <div className=" w-full">
-        <Overviewboxes transactions={transactions}/>
+    <div className=" p-4 flex flex-col lg:flex-row w-full gap-4">
+      {/* Left Section - Overview & Charts */}
+      <div className="w-full lg:w-3/5">
+        <div className="w-full">
+          <Overviewboxes transactions={transactions} />
+        </div>
+        <div className="w-full">
+          <h2 className="text-lg font-bold mt-4">Sales Over Time</h2>
+          <ExpensesChart transactions={transactions} />
+        </div>
       </div>
-      <div className="w-full ">
-      <h2>Sales Over Time</h2>
-        <ChartComponent transactions={transactions}/> 
+
+      <div className="w-full lg:w-2/5  flex flex-col gap-4 mt-4 lg:mt-0">
+       
+        <div>
+          <Mostexpenses transactions={transactions} />
+        </div>
+        <div>
+          <MostIncome transactions={transactions} />
+        </div>
       </div>
-     </div>
-   <div className="">
-   <div >
-    Subcriptions
-      </div>
-      <div>
-        <Mostexpenses transactions={transactions}/> 
-      </div>
-      <div>
-      <MostIncome transactions={transactions}/>
-      </div>
-   </div>
     </div>
   );
 };

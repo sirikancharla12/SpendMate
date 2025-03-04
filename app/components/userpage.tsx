@@ -1,15 +1,15 @@
-"use client"; 
+// "use client"; 
 
-import Sidebar from "./sidebar";
+// import Sidebar from "./sidebar";
 
-const UserPage = () => {
+// const UserPage = () => {
  
 
-  return (
-    <div>
-  <Sidebar/> 
-    </div>
-  );
-};
+//   return (
+//     <div>
+//   <Sidebar/> 
+//     </div>
+//   );
+// };
 
-export default UserPage;
+// export default UserPage;

@@ -1,9 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-// import { prisma } from '../../../../lib/prisma'; // Adjust if needed
 import { getServerSession } from 'next-auth';
 import { authConfig } from 'lib/auth';
 import prisma from 'lib/prisma';
-// import { getAuthenticatedUser } from '../../../../lib/auth'; // Adjust if needed
 
 interface CustomSession {
     user: {
@@ -12,7 +10,7 @@ interface CustomSession {
       email: string;
       name: string | null;
       image: string | null;
-      provider?: string; // Optional provider field
+      provider?: string; 
     };
   }
 
@@ -27,7 +25,6 @@ async function getAuthenticatedUser(req: NextRequest) {
 
 export async function DELETE(req: NextRequest, context: { params: { id: string } }) {
   try {
-    // Get the authenticated user details
     const { user, status, message } = await getAuthenticatedUser(req);
     console.log("here");
     if (!user) {
@@ -57,7 +54,6 @@ export async function DELETE(req: NextRequest, context: { params: { id: string }
       return new NextResponse(JSON.stringify({ error: "User not found" }), { status: 404 });
     }
 
-    // Fetch the transaction by its ID
     const existingTransaction = await prisma.expense.findUnique({
       where: { id: parsedId },
     });
@@ -88,68 +84,79 @@ export async function DELETE(req: NextRequest, context: { params: { id: string }
   }
 }
 
-
-
-
 export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
-    try {
-      const { user, status, message } = await getAuthenticatedUser(req);
-      if (!user) {
-        return new NextResponse(JSON.stringify({ error: message }), { status });
-      }
-  
-      const expenseId = parseInt(params.id);
-      if (isNaN(expenseId)) {
-        return new NextResponse(JSON.stringify({ error: "Invalid expense ID" }), { status: 400 });
-      }
-  
-      const lookupCriteria = user.googleId
-        ? { googleId: user.googleId }
-        : { email: user.email };
-  
-      const existingUser = await prisma.user.findFirst({ where: lookupCriteria });
-      if (!existingUser) {
-        return new NextResponse(JSON.stringify({ error: "User not found" }), { status: 404 });
-      }
-  
-      const existingExpense = await prisma.expense.findUnique({
-        where: { id: expenseId },
-      });
-  
-      if (!existingExpense || existingExpense.userId !== existingUser.id) {
-        return new NextResponse(JSON.stringify({ error: "Expense not found or user not authorized" }), { status: 404 });
-      }
-  
-      const body = await req.json();
-      const { description, amount, category, transactionType, date } = body;
-  
-      if (!description || !amount || !category || !transactionType || !date) {
-        return new NextResponse(JSON.stringify({ error: "Missing required fields in payload" }), { status: 400 });
-      }
-  
-      const parsedDate = new Date(date);
-      if (isNaN(parsedDate.getTime())) {
-        return new NextResponse(JSON.stringify({ error: "Invalid date format" }), { status: 400 });
-      }
-  
-      const updatedExpense = await prisma.expense.update({
-        where: { id: expenseId },
-        data: {
-          description,
-          amount,
-          category,
-          type: transactionType,
-          date: parsedDate,
-        },
-      });
-  
-      return new NextResponse(JSON.stringify(updatedExpense), { status: 200 });
-    } catch (error) {
-      console.error("Error processing request:", error);
-      return new NextResponse(
-        JSON.stringify({ error: error instanceof Error ? error.message : "Unknown error" }),
-        { status: 500 }
-      );
+  try {
+    const { user, status, message } = await getAuthenticatedUser(req);
+    if (!user) {
+      return new NextResponse(JSON.stringify({ error: message }), { status });
     }
+
+    const expenseId = parseInt(params.id, 10);
+    if (Number.isNaN(expenseId)) {
+      return new NextResponse(JSON.stringify({ error: "Invalid expense ID" }), { status: 400 });
+    }
+
+    const lookupCriteria = user.googleId ? { googleId: user.googleId } : { email: user.email };
+    const existingUser = await prisma.user.findUnique({ where: lookupCriteria });
+
+    if (!existingUser) {
+      return new NextResponse(JSON.stringify({ error: "User not found" }), { status: 404 });
+    }
+
+    const existingExpense = await prisma.expense.findUnique({ where: { id: expenseId } });
+
+    if (!existingExpense || existingExpense.userId !== existingUser.id) {
+      return new NextResponse(JSON.stringify({ error: "Expense not found or unauthorized" }), { status: 403 });
+    }
+
+    let body;
+    try {
+      body = await req.json();
+    } catch (err) {
+      return new NextResponse(JSON.stringify({ error: "Invalid JSON body" }), { status: 400 });
+    }
+
+    const { description, amount, category, type, date,userId } = body;
+    if (!description || amount === undefined || amount === null || !category || !type || !date || !userId) {
+     console.log(type);
+      return new NextResponse(JSON.stringify({ error: "Missing required fields" }), { status: 400 });
+    }
+
+    if (!type) {
+      return new NextResponse(JSON.stringify({ error: "transactionType is required" }), { status: 400 });
+    }
+
+    if (typeof amount !== "number" || isNaN(amount)) {
+      return new NextResponse(JSON.stringify({ error: "Invalid amount" }), { status: 400 });
+    }
+
+    if (!["income", "expense"].includes(type)) {
+      return new NextResponse(JSON.stringify({ error: "Invalid transaction type" }), { status: 400 });
+    }
+
+    const parsedDate = new Date(date);
+    if (isNaN(parsedDate.getTime())) {
+      return new NextResponse(JSON.stringify({ error: "Invalid date format" }), { status: 400 });
+    }
+
+    const updatedExpense = await prisma.expense.update({
+      where: { id: expenseId },
+      data: {
+        description,
+        amount,
+        category,
+        type,
+        date: parsedDate,
+      },
+    });
+
+    return new NextResponse(JSON.stringify(updatedExpense), { status: 200 });
+
+  } catch (error) {
+    console.error("Error:", error);
+    return new NextResponse(
+      JSON.stringify({ error: error instanceof Error ? error.message : "Unknown error" }),
+      { status: 500 }
+    );
   }
-  
+}

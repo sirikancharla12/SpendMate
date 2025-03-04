@@ -21,3 +21,13 @@ declare module "next-auth" {
     googleId?: string | null; // Add googleId field here
   }
 }
+
+export interface Transaction {
+  id: string;
+  description: string;
+  amount: number;
+  category: string;
+  type: "Income" | "Expense";
+  date: number; // Unix timestamp (milliseconds since epoch)
+}
+

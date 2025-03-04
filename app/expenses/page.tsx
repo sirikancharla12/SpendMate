@@ -9,6 +9,7 @@ import Navbar from "app/components/navbar";
 
 const Transactions = () => {
   const [transactions, setTransactions] = useState([]);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -30,29 +31,32 @@ const Transactions = () => {
     fetchTransactions();
   }, []); 
 
-  return (
 
-    <div className="display flex ">
-    <div className="w-1/5">
-     <Sidebar />
-        
-        </div>
-        <hr className="line bg-white w-0.5 h-screen" />
+
+      return (
+        <div className="flex flex-col h-screen">
+       
+          <Navbar setIsSidebarOpen={setIsSidebarOpen} isSidebarOpen={isSidebarOpen} />
+    
+         
+          <div className="flex flex-1 flex-col sm:flex-row overflow-hidden mt-[64px] sm:mt-[70px]">
+    <div
+      className={`absolute top-[64px] left-0 h-[calc(100vh-64px)] bg-[#181C3B] transition-all duration-300 overflow-hidden ${
+        isSidebarOpen ? "w-64" : "w-0"
+      }`}
+    >
+      <Sidebar isOpen={isSidebarOpen} />
+    </div>
     
     
-    <div className="flex-1">
-        
-    <div className=" ">
-<Navbar /> 
-    
-        
-        </div> 
-        <hr className="line bg-white w-full h-0.5" />
-    
+    <div
+          className={`sm:overflow-hidden overflow-auto  flex-1 flex flex-col p-4 transition-all duration-300 ${
+            isSidebarOpen ? "sm:ml-64 ml-0" : "sm:ml-0 "
+          } mt-[60px] sm:mt-0`}>
       <Expenses transactions={transactions} setTransactions={setTransactions} />
 
-    
-        </div>    
+        </div>
+          </div>
         </div>
       );
     

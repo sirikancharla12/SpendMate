@@ -18,7 +18,8 @@ model User {
   googleId      String? @unique  // Optional if using Google authentication
   updatedAt     DateTime @updatedAt // Automatically updates on changes
   accounts      Account[]  // Links to OAuth accounts (like Google)
-  expenses      Expense[]  // One-to-many relation with Expense
+  expenses      Expense[] 
+  savings Savings[] // One-to-many relation with Expense
 }
 
 model Account {
@@ -48,6 +49,20 @@ model Expense {
   category    String
   type        String
   date        DateTime 
+  recurring         Boolean  @default(false)
+  recurringFrequency String? 
+  recurringStartDate DateTime
   userId      String
   user        User     @relation(fields: [userId], references: [id])
+}
+
+model Savings{
+  id Int @id @default(autoincrement())
+  description String
+  amount Float
+  targetDate DateTime
+  percentageSaved Float?
+  amountSaved Float
+  userId String
+  user User @relation(fields: [userId],references: [id])
 }

@@ -6,4 +6,8 @@ require('ts-node').register({
   },
 });
 
-module.exports = require(resolve('./next.config.ts'));
+// module.exports = require(resolve('./next.config.ts'));
+module.exports = {
+  reactStrictMode: true,
+};
+
