@@ -5,6 +5,7 @@ import prisma from "./prisma";
 import bcrypt from "bcrypt";
 
 export const authConfig: NextAuthOptions = {
+  useSecureCookies: process.env.NODE_ENV === "production", 
   providers: [
     // Credentials Provider
     CredentialsProvider({
@@ -44,6 +45,7 @@ export const authConfig: NextAuthOptions = {
 
     // Google OAuth Provider
     GoogleProvider({
+      
       clientId: process.env.GOOGLE_CLIENT_ID as string,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
       authorization: {
