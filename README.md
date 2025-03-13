@@ -6,14 +6,14 @@ SpendMate is a full-stack expense tracking application designed to help users ef
 - **Expense Tracking**: Add, edit, and delete expenses with ease.
 - **Budget Management**: Set budgets and track spending against them.
 - **Data Visualization**: View expenses through interactive charts and graphs.
-- **User Authentication**: Secure login and signup with JWT authentication.
-- **Database Integration**: Stores financial data securely in MongoDB.
+- **User Authentication**: Secure login and signup with Google OAuth and NextAuth.
+- **Database Integration**: Stores financial data securely in PostgreSQL.
 
 ## Tech Stack
 - **Frontend**: Next.js
 - **Backend**: Next.js (API Routes)
 - **Database**: PostgreSQL (NeonDB)
-- **Authentication**: NextAuth (Google OAuth and Credentials)
+- **Authentication**: NextAuth (Google OAuth)
 
 ## Installation
 Follow these steps to set up SpendMate locally:
@@ -35,11 +35,11 @@ Follow these steps to set up SpendMate locally:
    - Create a `.env.local` file in the root directory.
    - Add the following variables:
      ```env
-    DATABASE_URL=your_postgresql_database_url
-GOOGLE_CLIENT_ID=your_google_client_id
-GOOGLE_CLIENT_SECRET=your_google_client_secret
-NEXTAUTH_SECRET=your_nextauth_secret
-NEXTAUTH_URL=http://localhost:3000
+     DATABASE_URL=your_postgresql_database_url
+     GOOGLE_CLIENT_ID=your_google_client_id
+     GOOGLE_CLIENT_SECRET=your_google_client_secret
+     NEXTAUTH_SECRET=your_nextauth_secret
+     NEXTAUTH_URL=http://localhost:3000
      ```
 5. Start the development server:
    ```sh
@@ -48,7 +48,7 @@ NEXTAUTH_URL=http://localhost:3000
 6. Open `http://localhost:3000` in your browser.
 
 ## Usage
-- **Sign Up/Login**: Create an account and log in securely.
+- **Sign Up/Login**: Create an account using Google OAuth.
 - **Add Expenses**: Enter expense details, including amount, category, and date.
 - **View Reports**: Access interactive charts and spending insights.
 - **Set Budgets**: Define spending limits and track financial goals.
@@ -66,4 +66,3 @@ This project is licensed under the MIT License.
 
 ## Contact
 For any issues or suggestions, please open an issue on GitHub or reach out to [sirikancharla1290@gmail.com].
-
