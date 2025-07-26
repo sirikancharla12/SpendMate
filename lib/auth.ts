@@ -27,6 +27,7 @@ export const authConfig: NextAuthOptions = {
             data: {
               email: credentials.email,
               password: hashedPassword,
+                 name: credentials.email.split("@")[0],
             },
           });
 
@@ -50,13 +51,13 @@ export const authConfig: NextAuthOptions = {
       clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
       authorization: {
         params: {
-          scope: "email profile", // Ensure these scopes are set
+          scope: "email profile", 
         },
       },
     }),
   ],
   session: {
-    strategy: "jwt", // Ensure session strategy is set to JWT
+    strategy: "jwt", 
   },
 
   callbacks: {

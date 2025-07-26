@@ -25,8 +25,10 @@ const Navbar = ({ isSidebarOpen, setIsSidebarOpen }: NavbarProps) => {
     return colors[Math.floor(Math.random() * colors.length)];
   };
   
-  const userName = session.user.name || "U"; // Default to "U" if name is missing
-  const firstLetter = userName.charAt(0).toUpperCase();
+  // const userName = session.user.name || "U"; // Default to "U" if name is missing
+  // const firstLetter = userName.charAt(0).toUpperCase();
+const firstLetter = (session.user.name?.[0] || session.user.email?.[0] || "U").toUpperCase();
+
   const randomColor = getRandomColor();
   
 
