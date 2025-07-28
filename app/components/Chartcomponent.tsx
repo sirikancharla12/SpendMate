@@ -1,7 +1,32 @@
+
+
+"use client";
 import React, { useState, useEffect } from "react";
 import { Line } from "react-chartjs-2";
 import Chart from "chart.js/auto";
-import { Filler } from "chart.js";
+import { ChartOptions, Filler } from "chart.js";
+
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend,
+} from "chart.js";
+
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend,
+  Filler
+);
 
 interface Transaction {
   id: string;
@@ -17,7 +42,7 @@ interface ExpensesChartProps {
 }
 
 const ExpensesChart: React.FC<ExpensesChartProps> = ({ transactions }) => {
-  const [selectedFilter, setSelectedFilter] = useState<string>("This Month");
+  const [selectedFilter, setSelectedFilter] = useState("This Month");
   const [chartData, setChartData] = useState<any>(null);
 
   useEffect(() => {
@@ -28,55 +53,51 @@ const ExpensesChart: React.FC<ExpensesChartProps> = ({ transactions }) => {
     let expenseData: number[] = [];
 
     if (selectedFilter === "This Month") {
-      startDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
-      const lastDateOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
+      const year = currentDate.getFullYear();
+      const month = currentDate.getMonth();
+      startDate = new Date(year, month, 1);
+      const lastDate = new Date(year, month + 1, 0).getDate();
 
-      const filteredTransactions = transactions.filter(transaction => {
-        const transactionDate = new Date(transaction.date);
-        return transactionDate >= startDate && transactionDate <= lastDateOfMonth;
+      // Initialize data with 0 for every day
+      labels = Array.from({ length: lastDate }, (_, i) => (i + 1).toString());
+      incomeData = new Array(lastDate).fill(0);
+      expenseData = new Array(lastDate).fill(0);
+
+      const filteredTransactions = transactions.filter((transaction) => {
+        const date = new Date(transaction.date);
+        return date.getFullYear() === year && date.getMonth() === month;
       });
 
-      // Aggregate income and expenses for the month
-      const dayData: { [key: string]: { income: number; expense: number } } = {};
-      filteredTransactions.forEach(transaction => {
-        const transactionDate = new Date(transaction.date);
-        const dayOfMonth = transactionDate.getDate().toString();
-
-        if (!dayData[dayOfMonth]) {
-          dayData[dayOfMonth] = { income: 0, expense: 0 };
-        }
-
+      filteredTransactions.forEach((transaction) => {
+        const day = new Date(transaction.date).getDate() - 1;
         if (transaction.type === "Income") {
-          dayData[dayOfMonth].income += transaction.amount;
+          incomeData[day] += transaction.amount;
         } else {
-          dayData[dayOfMonth].expense += transaction.amount;
+          expenseData[day] += transaction.amount;
         }
       });
-
-      labels = Object.keys(dayData);
-      incomeData = Object.values(dayData).map(data => data.income);
-      expenseData = Object.values(dayData).map(data => data.expense);
     }
 
     else if (selectedFilter === "Last 6 Months") {
       startDate = new Date(currentDate.getFullYear(), currentDate.getMonth() - 5, 1);
       labels = Array.from({ length: 6 }, (_, i) => {
-        let month = new Date();
-        month.setMonth(currentDate.getMonth() - (5 - i));
-        return `${month.toLocaleString("default", { month: "short" })} ${month.getFullYear()}`;
-      });
-      incomeData = Array(6).fill(0); // Initialize data array for 6 months
-      expenseData = Array(6).fill(0); // Initialize data array for 6 months
-
-      const filteredTransactions = transactions.filter(transaction => {
-        const transactionDate = new Date(transaction.date);
-        return transactionDate >= startDate && transactionDate <= currentDate;
+        const d = new Date();
+        d.setMonth(currentDate.getMonth() - 5 + i);
+        return `${d.toLocaleString("default", { month: "short" })} ${d.getFullYear()}`;
       });
 
-      filteredTransactions.forEach(transaction => {
-        const transactionDate = new Date(transaction.date);
-        const monthLabel = `${transactionDate.toLocaleString("default", { month: "short" })} ${transactionDate.getFullYear()}`;
-        const index = labels.indexOf(monthLabel);
+      incomeData = Array(6).fill(0);
+      expenseData = Array(6).fill(0);
+
+      const filteredTransactions = transactions.filter((transaction) => {
+        const date = new Date(transaction.date);
+        return date >= startDate && date <= currentDate;
+      });
+
+      filteredTransactions.forEach((transaction) => {
+        const date = new Date(transaction.date);
+        const label = `${date.toLocaleString("default", { month: "short" })} ${date.getFullYear()}`;
+        const index = labels.indexOf(label);
         if (index !== -1) {
           if (transaction.type === "Income") {
             incomeData[index] += transaction.amount;
@@ -87,31 +108,25 @@ const ExpensesChart: React.FC<ExpensesChartProps> = ({ transactions }) => {
       });
     }
 
-    // This Year
     else if (selectedFilter === "This Year") {
-      const currentYear = new Date().getFullYear(); // Get current year
+      const year = currentDate.getFullYear();
+      labels = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+      incomeData = new Array(12).fill(0);
+      expenseData = new Array(12).fill(0);
+
       const filteredTransactions = transactions.filter((transaction) => {
-        const transactionDate = new Date(transaction.date);
-        return transactionDate.getFullYear() === currentYear;
+        const date = new Date(transaction.date);
+        return date.getFullYear() === year;
       });
 
-      console.log("Filtered Transactions for This Year:", filteredTransactions);
-
-      incomeData = new Array(12).fill(0); // Initialize income data array for 12 months
-      expenseData = new Array(12).fill(0); // Initialize expense data array for 12 months
-
       filteredTransactions.forEach((transaction) => {
-        const monthIndex = new Date(transaction.date).getMonth(); // Get month index (0-indexed)
+        const monthIndex = new Date(transaction.date).getMonth();
         if (transaction.type === "Income") {
           incomeData[monthIndex] += transaction.amount;
-        } else if (transaction.type === "Expense") {
+        } else {
           expenseData[monthIndex] += transaction.amount;
         }
       });
-
-      labels = [
-        "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
-      ];
     }
 
     setChartData({
@@ -120,59 +135,57 @@ const ExpensesChart: React.FC<ExpensesChartProps> = ({ transactions }) => {
         {
           label: "Income",
           data: incomeData,
-          borderColor: "#4caf50",
-          backgroundColor: "rgba(0, 128, 0, 0.5)",
+          borderColor: "#16a34a",
+          backgroundColor: "rgba(22, 163, 74, 0.4)",
           fill: false,
-          tension: 0.3,
+          tension: 0.4,
         },
         {
           label: "Expenses",
           data: expenseData,
-          borderColor: "#ea580c",
-          backgroundColor: "rgba(234, 88, 12, 0.8)",
+          borderColor: "#dc2626",
+          backgroundColor: "rgba(220, 38, 38, 0.4)",
           fill: true,
-          tension: 0.3,
+          tension: 0.4,
         },
       ],
     });
   }, [selectedFilter, transactions]);
 
-  const options = {
+  const options: ChartOptions<'line'> =  {
     responsive: true,
     plugins: {
       legend: {
-        labels: {
-          color: "rgba(255, 255, 255, 0.7)", // Light white color
-          font: {
-            weight: "normal" as const, // No bold effect
-          },
-        },
+        display: false,
       },
     },
     scales: {
       x: {
+        
         ticks: {
-          color: "rgba(255, 255, 255, 0.7)", // Light white text for X-axis
+          color: "#4B5563",
           font: {
-            weight: "normal" as const, // No bold effect
-            family: "Arial, sans-serif" as const, // Optional for consistency
+            family: "Inter, sans-serif",
+            // weight: "500",
           },
         },
+        grid: { display: false },
       },
       y: {
         ticks: {
-          color: "rgba(255, 255, 255, 0.7)", // Light white text for Y-axis
+          color: "#4B5563",
           font: {
-            weight: "normal" as const, // No bold effect
-            family: "Arial, sans-serif",
+            family: "Inter, sans-serif",
+            // weight: "500",
           },
         },
+        grid: { display: false },
       },
     },
   };
-  
+
   return (
-    <div className="h-[300px] w-full ">
+  <div className="h-[300px] w-full ">
       <div className="flex gap-4 mb-4">
         <button className="px-4 py-2 bg-purple-600 hover:bg-purple-700 hover:shadow-lg focus:ring-0 text-white rounded transition-all" onClick={() => setSelectedFilter("This Month")}>
           This Month
@@ -193,11 +206,11 @@ const ExpensesChart: React.FC<ExpensesChartProps> = ({ transactions }) => {
       <p className="text-gray-400 text-lg">Loading...</p>
     ) : (
       <div className="w-full h-[300px]">
-        <Line data={chartData} options={options} />
+        <Line data={chartData} options={options}/>
       </div>
     )}
   </div>
-);
+  );
 };
 
 export default ExpensesChart;

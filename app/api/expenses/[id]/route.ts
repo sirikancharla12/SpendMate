@@ -130,7 +130,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
       return new NextResponse(JSON.stringify({ error: "Invalid amount" }), { status: 400 });
     }
 
-    if (!["income", "expense"].includes(type)) {
+    if (!["Income", "Expense"].includes(type)) {
       return new NextResponse(JSON.stringify({ error: "Invalid transaction type" }), { status: 400 });
     }
 

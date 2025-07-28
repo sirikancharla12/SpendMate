@@ -1,19 +1,18 @@
-import { useEffect, useState } from "react";
-import Expenses from "./expensescomponent";
-import Overview from "./greetinguser";
-import Overviewboxes from "./overviewboxes";
-import axios from "axios";
-import ChartComponent from "./Chartcomponent";
-import Mostexpenses from "./Mostexpenses";
-import MostIncome from "./MostIncome";
-import Savings from "./Savings";
-import ExpensesChart from "./Chartcomponent";
 
+
+import { useEffect, useState } from "react";
+import axios from "axios";
+
+import Overviewboxes from "./overviewboxes";
+import ExpensesChart from "./Chartcomponent";
+import MostIncome from "./MostIncome";
+import RecentTransaction from "./RecentTransactions";
 
 interface WorkspaceProps {
   isSidebarOpen: boolean;
 }
-const Workspace = ({ isSidebarOpen }: WorkspaceProps)  => {
+
+const Workspace = ({ isSidebarOpen }: WorkspaceProps) => {
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -36,25 +35,23 @@ const Workspace = ({ isSidebarOpen }: WorkspaceProps)  => {
   }, []);
 
   return (
-    <div className=" p-4 flex flex-col lg:flex-row w-full gap-4">
-      {/* Left Section - Overview & Charts */}
-      <div className="w-full lg:w-3/5">
-        <div className="w-full">
-          <Overviewboxes transactions={transactions} />
-        </div>
-        <div className="w-full">
-          <h2 className="text-lg font-bold mt-4">Sales Over Time</h2>
-          <ExpensesChart transactions={transactions} />
-        </div>
-      </div>
+    <div className="p-4 w-full flex flex-col gap-4 ">
+      {/* Overview Boxes at the top */}
+      <Overviewboxes transactions={transactions} />
 
-      <div className="w-full lg:w-2/5  flex flex-col gap-4 mt-4 lg:mt-0">
-       
-        <div>
-          <Mostexpenses transactions={transactions} />
-        </div>
-        <div>
-          <MostIncome transactions={transactions} />
+      {/* Charts section */}
+      <div className="flex flex-col lg:flex-row gap-6 ">
+  <div className="w-full lg:w-2/3 bg-[#fcfdff] p-6 pb-6 md:pb-15  rounded-lg shadow-md">
+  
+    <h2 className="text-black text-xl font-semibold mb-2">Monthly Expenses</h2>
+    <p className="text-gray-500 mb-4 text-sm">Your spending pattern over the last 6 months</p>
+    <ExpensesChart transactions={transactions} />
+  </div>
+
+        <div className="w-full lg:w-1/2">
+         <RecentTransaction transactions={transactions} />
+          {/* <h2 className="text-lg font-bold mb-2">Most Income</h2> */}
+          {/* <MostIncome transactions={transactions} /> */}
         </div>
       </div>
     </div>

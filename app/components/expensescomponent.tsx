@@ -160,13 +160,15 @@ const Expenses = ({ transactions, setTransactions }: ExpensesProps) => {
             Add
           </button>
         </div>
-        <Transactions transactions={transactions} setTransactions={setTransactions} 
+        <Transactions transactions={transactions} setTransactions={setTransactions}  
         />
       </div>
 
       {isFormVisible && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-          <div className="p-6 w-3/4 max-w-lg bg-white rounded-lg shadow-lg text-black relative">
+ 
+          <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 overflow-y-auto">
+  <div className="p-6 w-3/4 max-w-lg bg-white rounded-lg shadow-lg text-black relative my-10 max-h-screen overflow-y-auto">
+
             <h3 className="text-xl font-semibold mb-4 text-center text-purple-600">
               {editingTransactionId ? "Edit Transaction" : "Add New Transaction"}
             </h3>
@@ -228,7 +230,7 @@ const Expenses = ({ transactions, setTransactions }: ExpensesProps) => {
               <div className="mb-4">
                 <label className="block mb-1 font-semibold text-purple-600">Transaction Type</label>
                 <select
-                  name="transactionType"
+                  name="type"
                   value={transactionData.type}
                   onChange={handleChange}
                   className="block w-full p-2 rounded border border-purple-300 focus:outline-none focus:ring-2 focus:ring-purple-400"

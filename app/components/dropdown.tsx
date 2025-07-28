@@ -17,6 +17,7 @@ interface Transaction {
 interface TransactionsProps {
   transactions: Transaction[];
   setTransactions: React.Dispatch<React.SetStateAction<Transaction[]>>;
+  
 }
 
 const Transactions: React.FC<TransactionsProps> = ({ transactions, setTransactions,  }) => {
@@ -107,7 +108,7 @@ const Transactions: React.FC<TransactionsProps> = ({ transactions, setTransactio
     try {
       const updatedTransaction = {
         ...editValues,
-        transactionType: editValues.type || "expense", // Default if missing
+        type: editValues.type || "Expense", // Default if missing
         date: prepareDateForDB(editValues.date),
       };
   
@@ -169,7 +170,7 @@ setEditingRowId(null);
   return (
     <div className="p-4 max-w-4xl mx-auto">
       {/* Filters */}
-      <div className="flex flex-wrap gap-4 justify-center">
+      <div className="flex flex-wrap md:flex-nowrap gap-3 justify-center items-center w-full px-2">
         <input
           type="text"
           placeholder="Search..."
@@ -215,7 +216,7 @@ setEditingRowId(null);
           </thead>
         </table>
 
-        <div className="overflow-y-auto max-h-60"> {/* Adjust the max height for scrolling */}
+        <div className="overflow-y-auto max-h-40"> {/* Adjust the max height for scrolling */}
           <table className="w-full table-auto table-fixed border-separate border-spacing-y-2 text-xs sm:text-sm md:text-base">
             <tbody>
               {filteredTransactions.map((transaction) => (
@@ -251,7 +252,7 @@ setEditingRowId(null);
                       </td>
                       <td className="p-2">
                         <select
-                          name="transactionType"
+                          name="type"
                           value={editValues.type}
                           onChange={handleEditChange}
                           className="w-full p-2 border rounded-md text-purple-600"
