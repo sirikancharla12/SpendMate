@@ -101,18 +101,18 @@ const Transactions: React.FC<TransactionsProps> = ({ transactions, setTransactio
 
  
   const prepareDateForDB = (date: string) => {
-    return new Date(date).toISOString(); // Convert "YYYY-MM-DD" to ISO format
+    return new Date(date).toISOString();
   };
   
   const saveEdit = async () => {
     try {
       const updatedTransaction = {
         ...editValues,
-        type: editValues.type || "Expense", // Default if missing
+        type: editValues.type || "Expense", 
         date: prepareDateForDB(editValues.date),
       };
   
-      console.log("Sending payload:", updatedTransaction); // Debugging log
+      console.log("Sending payload:", updatedTransaction);
   
       const response = await fetch(`http://localhost:3000/api/expenses/${editingRowId}`, {
         method: "PUT",
@@ -169,7 +169,6 @@ setEditingRowId(null);
 
   return (
     <div className="p-4 max-w-4xl mx-auto">
-      {/* Filters */}
       <div className="flex flex-wrap md:flex-nowrap gap-3 justify-center items-center w-full px-2">
         <input
           type="text"
@@ -198,110 +197,133 @@ setEditingRowId(null);
           <option value="yearly">This Year</option>
         </select>
         <button onClick={clearFilters} className="bg-red-500 text-white font-semibold px-4 py-2 rounded">
-          Clear Filters
+          Clear 
         </button>
       </div>
 
-      <div className="mt-4">
-        <table className="w-full table-auto table-fixed border-separate border-spacing-y-2 text-xs sm:text-sm md:text-base">
-          <thead>
-            <tr className="bg-purple-600 text-white">
-              <th className="p-2 w-1/4">Transaction</th>
-              <th className="p-2 w-1/4">Amount</th>
-              <th className="p-2 w-1/4">Category</th>
-              <th className="p-2 w-1/4">Type</th>
-              <th className="p-2 w-1/4">Date</th>
-              <th className="p-2 w-1/4">Action</th>
-            </tr>
-          </thead>
-        </table>
+      
 
-        <div className="overflow-y-auto max-h-40"> {/* Adjust the max height for scrolling */}
-          <table className="w-full table-auto table-fixed border-separate border-spacing-y-2 text-xs sm:text-sm md:text-base">
-            <tbody>
-              {filteredTransactions.map((transaction) => (
-                <tr key={transaction.id} className="text-center hover:bg-purple-300 transition duration-200">
-                  {editingRowId === transaction.id ? (
-                    <>
-                      <td className="p-2">
-                        <input
-                          type="text"
-                          name="description"
-                          value={editValues.description}
-                          onChange={handleEditChange}
-                          className="w-full p-2 border rounded-md text-purple-600"
-                        />
-                      </td>
-                      <td className="p-2">
-                        <input
-                          type="number"
-                          name="amount"
-                          value={editValues.amount}
-                          onChange={handleEditChange}
-                          className="w-full p-2 border rounded-md text-purple-600"
-                        />
-                      </td>
-                      <td className="p-2">
-                        <input
-                          type="text"
-                          name="category"
-                          value={editValues.category}
-                          onChange={handleEditChange}
-                          className="w-full p-2 border rounded-md text-purple-600"
-                        />
-                      </td>
-                      <td className="p-2">
-                        <select
-                          name="type"
-                          value={editValues.type}
-                          onChange={handleEditChange}
-                          className="w-full p-2 border rounded-md text-purple-600"
-                        >
-                          <option value="Income">Income</option>
-                          <option value="Expense">Expense</option>
-                        </select>
-                      </td>
-                      <td className="p-2">
-                        <input
-                          type="date"
-                          name="date"
-                          value={editValues.date}
-                          onChange={handleEditChange}
-                          className="w-full p-2 border rounded-md text-purple-600"
-                        />
-                      </td>
-                      <td className="p-2 flex justify-around space-x-2">
-                        <button onClick={saveEdit} >
-                          <img src="/correct.svg" alt="Save Edit" className="w-8 h-8 sm:w-8 sm:h-8" />
-                        </button>
-                        <button onClick={cancelEdit}>
-                          <img src="/x.svg" alt="Cancel Edit" className="w-8 h-8 sm:w-8 sm:h-8" />
-                        </button>
-                      </td>
-                    </>
-                  ) : (
-                    <>
-                      <td>{transaction.description}</td>
-                      <td>{transaction.amount}</td>
-                      <td>{transaction.category}</td>
-                      <td>{transaction.type}</td>
-                      <td>{format(new Date(transaction.date), 'dd-MM-yyyy')}</td>
-                      <td className="flex justify-around items-center">
-                        <button onClick={() => startEditing(transaction.id)} className="text-white px-2 py-2 rounded">
-                          <img src="/editimggg.svg" alt="Edit" className="w-6 h-6 sm:w-5 sm:h-5" />
-                        </button> 
-                        <button onClick={() => deleteAction(transaction.id)} className="text-white px-2 py-2 rounded">
-                          <img src="/icons8-trash.svg" alt="Delete" className="w-6 h-6 sm:w-6 sm:h-6" />
-                        </button>
-                      </td>
-                    </>
-                  )}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
+      <div className="mt-4">
+  {filteredTransactions.length === 0 ? (
+<div className="flex flex-col items-center justify-center py-10 text-center rounded-2xl shadow-sm border border-purple-300">
+  <h2 className="text-lg font-medium text-purple-400 mb-2 italic tracking-wide">
+    Oops! Your wallet looks too quiet
+  </h2>
+  <p className="text-sm text-gray-500">
+    Start by adding your first expense 
+  </p>
+</div>
+
+
+  ) : (
+    <div className="overflow-y-auto max-h-40">
+      <table className="w-full table-auto table-fixed border-separate border-spacing-y-2 text-xs sm:text-sm md:text-base">
+        <thead>
+          <tr className="bg-purple-600 text-white">
+            <th className="p-2 w-1/4">Transaction</th>
+            <th className="p-2 w-1/4">Amount</th>
+            <th className="p-2 w-1/4">Category</th>
+            <th className="p-2 w-1/4">Type</th>
+            <th className="p-2 w-1/4">Date</th>
+            <th className="p-2 w-1/4">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+      {filteredTransactions.map((transaction) => (
+        editingRowId === transaction.id ? (
+          <tr
+            key={transaction.id}
+            className="text-center hover:bg-purple-300 transition duration-200"
+          >
+            <td className="p-2">
+              <input
+                type="text"
+                name="description"
+                value={editValues.description}
+                onChange={handleEditChange}
+                className="w-full p-2 border rounded-md text-purple-600"
+              />
+            </td>
+            <td className="p-2">
+              <input
+                type="number"
+                name="amount"
+                value={editValues.amount}
+                onChange={handleEditChange}
+                className="w-full p-2 border rounded-md text-purple-600"
+              />
+            </td>
+            <td className="p-2">
+              <input
+                type="text"
+                name="category"
+                value={editValues.category}
+                onChange={handleEditChange}
+                className="w-full p-2 border rounded-md text-purple-600"
+              />
+            </td>
+            <td className="p-2">
+              <select
+                name="type"
+                value={editValues.type}
+                onChange={handleEditChange}
+                className="w-full p-2 border rounded-md text-purple-600"
+              >
+                <option value="Income">Income</option>
+                <option value="Expense">Expense</option>
+              </select>
+            </td>
+            <td className="p-2">
+              <input
+                type="date"
+                name="date"
+                value={editValues.date}
+                onChange={handleEditChange}
+                className="w-full p-2 border rounded-md text-purple-600"
+              />
+            </td>
+            <td className="p-2 flex justify-around space-x-2">
+              <button onClick={saveEdit}>
+                <img src="/correct.svg" alt="Save Edit" className="w-8 h-8 sm:w-8 sm:h-8" />
+              </button>
+              <button onClick={cancelEdit}>
+                <img src="/x.svg" alt="Cancel Edit" className="w-8 h-8 sm:w-8 sm:h-8" />
+              </button>
+            </td>
+          </tr>
+        ) : (
+          <tr
+            key={transaction.id}
+            className="text-center hover:bg-purple-300 transition duration-200"
+          >
+            <td>{transaction.description}</td>
+            <td>{transaction.amount}</td>
+            <td>{transaction.category}</td>
+            <td>{transaction.type}</td>
+            <td>{format(new Date(transaction.date), "dd-MM-yyyy")}</td>
+            <td className="flex justify-around items-center">
+              <button
+                onClick={() => startEditing(transaction.id)}
+                className="text-white px-2 py-2 rounded"
+              >
+                <img src="/editimggg.svg" alt="Edit" className="w-6 h-6 sm:w-5 sm:h-5" />
+              </button>
+              <button
+                onClick={() => deleteAction(transaction.id)}
+                className="text-white px-2 py-2 rounded"
+              >
+                <img src="/icons8-trash.svg" alt="Delete" className="w-6 h-6 sm:w-6 sm:h-6" />
+              </button>
+            </td>
+          </tr>
+        )
+      ))}
+        </tbody>
+      </table>
+    </div>
+  )}
+</div>
+
     </div>
   );
 };

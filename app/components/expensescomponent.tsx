@@ -89,7 +89,6 @@ const Expenses = ({ transactions, setTransactions }: ExpensesProps) => {
       description: transactionData.description,
       amount: transactionData.amount,
       category: transactionData.category,
-      // type  : transactionData.transactionType,
       type: transactionData.type,
       date: transactionData.date,
     };
