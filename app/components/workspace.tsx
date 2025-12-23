@@ -40,15 +40,19 @@ const Workspace = ({ isSidebarOpen }: WorkspaceProps) => {
       <Overviewboxes transactions={transactions} />
 
       {/* Charts section */}
-      <div className="flex flex-col lg:flex-row gap-6 ">
-  <div className="w-full lg:w-2/3 bg-[#fcfdff] p-6 pb-6 md:pb-15  rounded-lg shadow-md">
+      <div className="grid grid-cols-4 lg:flex-row gap-6 ">
+  <div className=" bg-[#fcfdff] p-6 pb-6 md:pb-15  rounded-lg shadow-md cols-span-2 lg:col-span-3">
   
     <h2 className="text-black text-xl font-semibold mb-2">Monthly Expenses</h2>
     <p className="text-gray-500 mb-4 text-sm">Your spending pattern over the last 6 months</p>
-    <ExpensesChart transactions={transactions} />
+    <div className="lg:col-span-3 w-full">
+  <ExpensesChart transactions={transactions} />
+</div>
+
+    {/* <ExpensesChart transactions={transactions} /> */}
   </div>
 
-        <div className="w-full lg:w-1/2">
+        <div className="h-auto lg:col-span-1">
          <RecentTransaction transactions={transactions} />
           {/* <h2 className="text-lg font-bold mb-2">Most Income</h2> */}
           {/* <MostIncome transactions={transactions} /> */}

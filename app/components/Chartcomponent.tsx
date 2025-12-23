@@ -137,7 +137,7 @@ const ExpensesChart: React.FC<ExpensesChartProps> = ({ transactions }) => {
           data: incomeData,
           borderColor: "#16a34a",
           backgroundColor: "rgba(22, 163, 74, 0.4)",
-          fill: false,
+          fill: true,
           tension: 0.4,
         },
         {
@@ -154,6 +154,7 @@ const ExpensesChart: React.FC<ExpensesChartProps> = ({ transactions }) => {
 
   const options: ChartOptions<'line'> =  {
     responsive: true,
+      maintainAspectRatio: false, 
     plugins: {
       legend: {
         display: false,
@@ -185,7 +186,7 @@ const ExpensesChart: React.FC<ExpensesChartProps> = ({ transactions }) => {
   };
 
   return (
-  <div className="h-[300px] w-full ">
+  <div className="h-auto w-full ">
       <div className="flex gap-4 mb-4">
         <button className="px-4 py-2 bg-purple-600 hover:bg-purple-700 hover:shadow-lg focus:ring-0 text-white rounded transition-all" onClick={() => setSelectedFilter("This Month")}>
           This Month
@@ -205,7 +206,7 @@ const ExpensesChart: React.FC<ExpensesChartProps> = ({ transactions }) => {
       {!chartData ? (
       <p className="text-gray-400 text-lg">Loading...</p>
     ) : (
-      <div className="w-full h-[300px]">
+      <div className="relative w-full h-[300px]">
         <Line data={chartData} options={options}/>
       </div>
     )}
