@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import axios from "axios";
 
@@ -11,7 +10,6 @@ import SpendingActivty from "./SpendingActivity";
 const Workspace = ({ isSidebarOpen }) => {
     const [transactions, setTransactions] = useState([]);
     const [loading, setLoading] = useState(false);
-    const [errorMessage, setErrorMessage] = useState(null);
 
     const fetchTransactions = async () => {
         setLoading(true);
@@ -20,7 +18,6 @@ const Workspace = ({ isSidebarOpen }) => {
             setTransactions(response.data);
         } catch (error) {
             console.error("Error fetching transactions:", error);
-            setErrorMessage("An error occurred while fetching transactions.");
         } finally {
             setLoading(false);
         }
@@ -31,27 +28,20 @@ const Workspace = ({ isSidebarOpen }) => {
     }, []);
 
     return (
-        <div className="p-4 w-full flex flex-col gap-4  bg-[#101622]">
+        <div className="flex flex-col gap-8 w-full">
             <Overviewboxes transactions={transactions} />
 
             {/* Charts section */}
-            <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-
-                <div className="lg:col-span-3 w-full h-auto   ">
+            <div className="grid grid-cols-1 xl:grid-cols-4 gap-6">
+                <div className="xl:col-span-3 w-full">
                     <SpendingActivty />
-                    {/* <ExpensesChart transactions={transactions} /> */}
                 </div>
 
-                <div className="lg:col-span-1 w-full">
+                <div className="xl:col-span-1 w-full">
                     <RecentTransaction transactions={transactions} />
                 </div>
-
             </div>
-
-
         </div>
-
-
     );
 };
 

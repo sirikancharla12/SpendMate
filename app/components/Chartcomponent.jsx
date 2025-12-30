@@ -1,5 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
+import { useTheme } from "next-themes";
 import { Doughnut, Line } from "react-chartjs-2";
 import Chart from "chart.js/auto";
 import { Filler } from "chart.js";
@@ -28,62 +29,14 @@ ChartJS.register(
     Filler
 );
 
-
-const doughnutCenterText = {
-    id: "doughnutCenterText",
-    afterDraw(chart) {
-        const { ctx, chartArea, data } = chart;
-        const activeElements = chart.getActiveElements();
-
-        const centerX = (chartArea.left + chartArea.right) / 2;
-        const centerY = (chartArea.top + chartArea.bottom) / 2;
-
-        ctx.save();
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
-
-
-        if (!activeElements.length) {
-            const total = data.datasets[0].data.reduce(
-                (sum, val) => sum + val,
-                0
-            );
-
-            ctx.font = "500 14px Inter";
-            ctx.fillStyle = "#9ca3af";
-            ctx.fillText("Total", centerX, centerY - 10);
-
-            ctx.font = "700 20px Inter";
-            ctx.fillStyle = "#ffffff";
-            ctx.fillText(`₹${total}`, centerX, centerY + 14);
-
-            ctx.restore();
-            return;
-        }
-
-        const { index, datasetIndex } = activeElements[0];
-        const label = data.labels[index];
-        const value = data.datasets[datasetIndex].data[index];
-
-        ctx.font = "500 14px Inter";
-        ctx.fillStyle = "#9ca3af";
-        ctx.fillText(label, centerX, centerY - 10);
-
-        ctx.font = "700 20px Inter";
-        ctx.fillStyle = "#ffffff";
-        ctx.fillText(`₹${value}`, centerX, centerY + 14);
-
-        ctx.restore();
-    },
-};
-
 const ExpensesChart = ({ transactions }) => {
+    const { theme } = useTheme();
+    const isDark = theme === "dark";
     const [selectedFilter, setSelectedFilter] = useState("This Month");
     const [chartData, setChartData] = useState({
         labels: [],
         datasets: [],
     });
-
 
     useEffect(() => {
         const currentDate = new Date();
@@ -116,7 +69,6 @@ const ExpensesChart = ({ transactions }) => {
                 }
             });
         }
-
         else if (selectedFilter === "Last 6 Months") {
             startDate = new Date(currentDate.getFullYear(), currentDate.getMonth() - 5, 1);
             labels = Array.from({ length: 6 }, (_, i) => {
@@ -146,7 +98,6 @@ const ExpensesChart = ({ transactions }) => {
                 }
             });
         }
-
         else if (selectedFilter === "This Year") {
             const year = currentDate.getFullYear();
             labels = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
@@ -174,26 +125,24 @@ const ExpensesChart = ({ transactions }) => {
                 {
                     label: "Income",
                     data: incomeData,
-                    borderColor: "#3b82f6",
-                    backgroundColor: "rgba(59,130,246,0.25)",
+                    borderColor: "#10b981", // Fintech Green
+                    backgroundColor: "rgba(16, 185, 129, 0.1)",
                     fill: true,
-                    tension: 0.45,
-                    pointRadius: 0,
+                    tension: 0.4,
                     borderWidth: 2,
+                    pointRadius: 2,
                 },
                 {
                     label: "Expenses",
                     data: expenseData,
-                    borderColor: "rgba(59,130,246,0.4)",
-                    backgroundColor: "rgba(59,130,246,0.15)",
+                    borderColor: "#ef4444", // Fintech Red
+                    backgroundColor: "rgba(239, 68, 68, 0.1)",
                     fill: true,
-                    tension: 0.45,
-                    pointRadius: 0,
-                    borderDash: [5, 5],
+                    tension: 0.4,
                     borderWidth: 2,
+                    pointRadius: 2,
                 },
             ],
-
         });
     }, [selectedFilter, transactions]);
 
@@ -207,35 +156,37 @@ const ExpensesChart = ({ transactions }) => {
         plugins: {
             legend: { display: false },
             tooltip: {
-                backgroundColor: "#0f172a",
-                titleColor: "#e5e7eb",
-                bodyColor: "#ffffff",
-                borderColor: "#334155",
+                backgroundColor: isDark ? "#1e293b" : "#ffffff",
+                titleColor: isDark ? "#f8fafc" : "#0f172a",
+                bodyColor: isDark ? "#cbd5e1" : "#334155",
+                borderColor: isDark ? "#334155" : "#e2e8f0",
                 borderWidth: 1,
-                displayColors: false,
                 padding: 10,
+                displayColors: true,
                 callbacks: {
-                    label: (ctx) => `₹${ctx.parsed.y}`,
+                    label: (ctx) => `${ctx.dataset.label}: ₹${ctx.parsed.y}`,
                 },
             },
         },
         scales: {
             x: {
                 ticks: {
-                    color: "#9ca3af",
+                    color: isDark ? "#9ca3af" : "#64748b",
                     font: { size: 11 },
                 },
                 grid: { display: false },
             },
             y: {
                 ticks: {
-                    color: "#9ca3af",
+                    color: isDark ? "#9ca3af" : "#64748b",
                     font: { size: 11 },
                     callback: (v) => `₹${v}`,
                 },
                 grid: {
-                    color: "rgba(255,255,255,0.06)",
+                    color: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)",
+                    borderDash: [4, 4],
                 },
+                border: { display: false }
             },
         },
     };
@@ -247,10 +198,10 @@ const ExpensesChart = ({ transactions }) => {
                 data: [300, 50, 100],
                 backgroundColor: [
                     "#3b82f6",
-                    "#6366f1",
-                    "#60a5fa",
+                    "#10b981",
+                    "#f59e0b",
                 ],
-                borderColor: "#0f172a",
+                borderColor: isDark ? "#1e293b" : "#ffffff",
                 borderWidth: 2,
                 hoverOffset: 6,
             },
@@ -262,85 +213,85 @@ const ExpensesChart = ({ transactions }) => {
         maintainAspectRatio: false,
         cutout: "70%",
         plugins: {
-            tooltip: {
-                enabled: false,
-            },
+            tooltip: { enabled: true },
             legend: {
                 position: "bottom",
                 labels: {
-                    color: "#9ca3af",
+                    color: isDark ? "#9ca3af" : "#64748b",
                     font: { size: 12 },
+                    usePointStyle: true,
                 },
             },
         },
     };
 
-
-
-
+    const doughnutCenterText = {
+        id: "doughnutCenterText",
+        afterDraw(chart) {
+            const { ctx, chartArea, data } = chart;
+            const centerX = (chartArea.left + chartArea.right) / 2;
+            const centerY = (chartArea.top + chartArea.bottom) / 2;
+            ctx.save();
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            ctx.font = "500 12px sans-serif";
+            ctx.fillStyle = isDark ? "#9ca3af" : "#64748b";
+            ctx.fillText("Total", centerX, centerY - 10);
+            ctx.font = "700 16px sans-serif";
+            ctx.fillStyle = isDark ? "#ffffff" : "#0f172a";
+            ctx.fillText(`₹450`, centerX, centerY + 10); // Mock total for now
+            ctx.restore();
+        }
+    }
 
     return (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-3">
-
-            <div className="lg:col-span-2 bg-[#161d2f] border border-[#1f2a44] p-6 rounded-xl shadow-md">
-
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
+            <div className="lg:col-span-2 bg-card text-card-foreground border border-border p-6 rounded-xl shadow-sm">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
                     <div>
-                        <h2 className="text-white text-xl font-semibold">
-                            Monthly Expenses
+                        <h2 className="text-lg font-semibold tracking-tight">
+                            Monthly Cash Flow
                         </h2>
-                        <p className="text-gray-500 text-sm">
-                            Your spending pattern over the last 6 months
+                        <p className="text-sm text-muted-foreground">
+                            Income vs Expenses
                         </p>
                     </div>
 
-                    <div className="flex gap-2 mt-3 sm:mt-0">
-                        <button
-                            className="px-2.5 py-1 text-xs rounded-md bg-[#3b82f6] text-white"
-                            onClick={() => setSelectedFilter("This Month")}
-                        >
-                            This Month
-                        </button>
-                        <button
-                            className="px-2.5 py-1 text-xs rounded-md bg-[#101622] border border-[#1f2a44] text-gray-400"
-                            onClick={() => setSelectedFilter("Last 6 Months")}
-                        >
-                            Last 6 Months
-                        </button>
-                        <button
-                            className="px-2.5 py-1 text-xs rounded-md bg-[#101622] border border-[#1f2a44] text-gray-400"
-                            onClick={() => setSelectedFilter("This Year")}
-                        >
-                            This Year
-                        </button>
+                    <div className="flex gap-2 mt-3 sm:mt-0 p-1 bg-secondary rounded-lg">
+                        {["This Month", "Last 6 Months", "This Year"].map(filter => (
+                            <button
+                                key={filter}
+                                className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all ${selectedFilter === filter
+                                        ? "bg-background text-foreground shadow-sm"
+                                        : "text-muted-foreground hover:text-foreground"
+                                    }`}
+                                onClick={() => setSelectedFilter(filter)}
+                            >
+                                {filter}
+                            </button>
+                        ))}
                     </div>
                 </div>
 
                 <div className="h-[300px]">
-                    {chartData ? (
-                        <Line data={chartData} options={options} />
-                    ) : (
-                        <p className="text-gray-400 text-sm">Loading chart...</p>
-                    )}
+                    <Line data={chartData} options={options} key={theme} />
                 </div>
-
             </div>
 
-            <div className="bg-[#161d2f] border border-[#1f2a44] p-6 rounded-xl shadow-md flex flex-col items-center justify-center">
-                <h3 className="text-white text-sm font-medium mb-4">
+            <div className="bg-card text-card-foreground border border-border p-6 rounded-xl shadow-sm flex flex-col items-center justify-center">
+                <h3 className="text-sm font-medium mb-6 text-foreground">
                     Expense Breakdown
                 </h3>
 
-                <div className="w-[300px] h-[300px]">
+                <div className="w-[240px] h-[240px] relative">
                     <Doughnut
                         data={doughnutData}
                         options={doughnutOptions}
                         plugins={[doughnutCenterText]}
+                        key={theme + "-doughnut"}
                     />
-
                 </div>
             </div>
-
         </div>
     );
 }

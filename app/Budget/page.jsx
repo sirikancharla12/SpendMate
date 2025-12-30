@@ -1,16 +1,16 @@
 "use client";
 
 import axios from "axios";
-import { Plus } from "lucide-react";
+import { Plus, TrendingUp, AlertCircle, CheckCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import clsx from "clsx";
 
 export default function BudgetPage() {
     const router = useRouter();
     const [budgets, setBudgets] = useState([]);
     const [loading, setLoading] = useState(true);
 
-    // 🔹 Fetch budgets
     const getBudgetItems = async () => {
         try {
             const res = await axios.get("/api/budget");
@@ -26,104 +26,131 @@ export default function BudgetPage() {
         getBudgetItems();
     }, []);
 
-    // 🔹 Calculations
-    const totalBudget = budgets.reduce(
-        (sum, b) => sum + b.spendinglimit,
-        0
-    );
-
-    const totalSpent = budgets.reduce(
-        (sum, b) => sum + (b.spent || 0),
-        0
-    );
-
+    const totalBudget = budgets.reduce((sum, b) => sum + b.spendinglimit, 0);
+    const totalSpent = budgets.reduce((sum, b) => sum + (b.spent || 0), 0);
     const remaining = totalBudget - totalSpent;
+    const overallProgress = totalBudget > 0 ? (totalSpent / totalBudget) * 100 : 0;
 
     if (loading) {
-        return <p className="text-gray-400 p-6">Loading budgets...</p>;
+        return (
+            <div className="flex justify-center items-center h-[50vh]">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+            </div>
+        );
     }
 
     return (
-        <div className="p-6 text-white">
-            {/* Header */}
-            <div className="mb-6">
-                <h1 className="text-2xl font-semibold">Budgets</h1>
-                <p className="text-sm text-gray-400">
-                    Manage your monthly spending limits and track progress.
-                </p>
+        <div className="space-y-8 fade-in">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                    <h1 className="text-3xl font-bold tracking-tight text-foreground">
+                        Budgets
+                    </h1>
+                    <p className="text-muted-foreground mt-1">
+                        Track your spending limits and financial goals.
+                    </p>
+                </div>
+
+                <div className="flex items-center gap-3">
+                    <div className="px-4 py-2 bg-card border border-border rounded-lg text-sm font-medium shadow-sm">
+                        Overall Status: <span className={remaining >= 0 ? "text-fintech-green" : "text-fintech-red"}>{remaining >= 0 ? "On Track" : "Over Budget"}</span>
+                    </div>
+                </div>
             </div>
 
-            {/* Summary */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-                <SummaryCard title="Total Budget" value={`₹${totalBudget}`} />
-                <SummaryCard title="Total Spent" value={`₹${totalSpent}`} />
-                <SummaryCard title="Remaining" value={`₹${remaining}`} highlight />
+            {/* Summary Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <SummaryCard
+                    title="Total Budget"
+                    value={totalBudget}
+                    icon={TrendingUp}
+                    className="border-l-4 border-l-primary"
+                />
+                <SummaryCard
+                    title="Total Spent"
+                    value={totalSpent}
+                    icon={AlertCircle}
+                    className="border-l-4 border-l-fintech-red"
+                />
+                <SummaryCard
+                    title="Remaining"
+                    value={remaining}
+                    icon={CheckCircle}
+                    highlight
+                    className="border-l-4 border-l-fintech-green"
+                />
             </div>
 
-            {/* Budget Cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            {/* Budget Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {budgets.map((b) => {
                     const spent = b.spent || 0;
-                    const percent = Math.min(
-                        (spent / b.spendinglimit) * 100,
-                        100
-                    );
+                    const percent = Math.min((spent / b.spendinglimit) * 100, 100);
+                    const isOverBudget = spent > b.spendinglimit;
 
                     return (
                         <div
                             key={b.id || b.category}
-                            className="bg-[#161d2f] border border-gray-700 rounded-xl p-5"
+                            className="bg-card text-card-foreground border border-border rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow group relative overflow-hidden"
                         >
-                            <div className="flex justify-between items-center mb-3">
-                                <h3 className="font-medium">{b.category}</h3>
-                                <span className="text-xs text-gray-400">
-                                    ₹{spent} / ₹{b.spendinglimit}
+                            <div className="flex justify-between items-start mb-4">
+                                <div>
+                                    <h3 className="font-semibold text-lg">{b.category}</h3>
+                                    <p className="text-xs text-muted-foreground mt-1">Monthly Limit</p>
+                                </div>
+                                <span className={clsx("text-xs font-medium px-2 py-1 rounded-full",
+                                    isOverBudget ? "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400" : "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
+                                )}>
+                                    {Math.round(percent)}%
                                 </span>
                             </div>
 
-                            <div className="w-full h-2 bg-gray-700 rounded-full overflow-hidden">
-                                <div
-                                    className="h-full bg-blue-500"
-                                    style={{ width: `${percent}%` }}
-                                />
-                            </div>
+                            <div className="space-y-2">
+                                <div className="flex justify-between text-sm">
+                                    <span className="text-muted-foreground">Spent</span>
+                                    <span className="font-medium">₹{spent.toLocaleString()} <span className="text-muted-foreground">/ ₹{b.spendinglimit.toLocaleString()}</span></span>
+                                </div>
 
-                            <p className="text-xs text-gray-400 mt-2">
-                                {Math.round(percent)}% spent
-                            </p>
+                                <div className="w-full h-2.5 bg-secondary rounded-full overflow-hidden">
+                                    <div
+                                        className={clsx("h-full rounded-full transition-all duration-500",
+                                            isOverBudget ? "bg-fintech-red" : "bg-primary"
+                                        )}
+                                        style={{ width: `${percent}%` }}
+                                    />
+                                </div>
+                            </div>
                         </div>
                     );
                 })}
 
-                {/* Create New Budget */}
-                <div
+                {/* Create New Budget Card */}
+                <button
                     onClick={() => router.push("/Budget/new")}
-                    className="flex items-center justify-center border-2 border-dashed border-gray-600 rounded-xl text-gray-400 hover:text-white hover:border-blue-500 cursor-pointer transition"
+                    className="flex flex-col items-center justify-center border-2 border-dashed border-border rounded-xl p-6 text-muted-foreground hover:text-primary hover:border-primary hover:bg-primary/5 transition-all cursor-pointer min-h-[180px]"
                 >
-                    <div className="flex flex-col items-center gap-2 py-10">
-                        <Plus />
-                        <span className="text-sm">Create New Category</span>
+                    <div className="h-12 w-12 rounded-full bg-secondary flex items-center justify-center mb-3 text-foreground">
+                        <Plus size={24} />
                     </div>
-                </div>
+                    <span className="font-medium">Create New Budget</span>
+                </button>
             </div>
         </div>
     );
 }
 
-/* ---------- Summary Card ---------- */
-
-function SummaryCard({
-    title,
-    value,
-    highlight,
-}) {
+function SummaryCard({ title, value, highlight, className, icon: Icon }) {
     return (
-        <div
-            className={`rounded-xl border border-gray-700 p-5 ${highlight ? "bg-[#0f172a]" : "bg-[#161d2f]"
-                }`}
-        >
-            <p className="text-sm text-gray-400">{title}</p>
-            <h2 className="text-2xl font-semibold mt-1">{value}</h2>
+        <div className={clsx("bg-card text-card-foreground rounded-xl border border-border p-6 shadow-sm", className)}>
+            <div className="flex items-center gap-3 mb-2">
+                <div className="p-2 rounded-lg bg-secondary text-secondary-foreground">
+                    <Icon size={18} />
+                </div>
+                <p className="text-sm text-muted-foreground font-medium">{title}</p>
+            </div>
+            <h2 className="text-3xl font-bold tracking-tight">
+                ₹{value.toLocaleString()}
+            </h2>
         </div>
     );
 }

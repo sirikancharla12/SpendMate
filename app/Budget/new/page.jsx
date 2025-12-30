@@ -3,135 +3,116 @@
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-
+import { ChevronLeft } from "lucide-react";
 
 export default function NewBudget() {
     const router = useRouter();
-    const [category, setcategory] = useState("");
-    const [spendinglimit, setspendinglimit] = useState(0);
-    const [Frequency, setfrequency] = useState("");
+    const [category, setCategory] = useState("");
+    const [spendingLimit, setSpendingLimit] = useState("");
+    const [frequency, setFrequency] = useState("Monthly");
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
+    const categories = [
+        "Food", "Transport", "Entertainment", "Shopping", "Groceries",
+        "Education", "Business", "Healthcare", "Utilities", "Travel", "Others"
+    ];
 
-    const handleSubmit = async () => {
+    const handleSubmit = async (e) => {
+        e.preventDefault();
 
-        if (!category || !spendinglimit || !Frequency) {
-            alert("All the fields are required");
-            return
+        if (!category || !spendingLimit || !frequency) {
+            alert("All fields are required");
+            return;
         }
 
-        const payload = {
-            category,
-            spendinglimit: Number(spendinglimit),
-            frequency: Frequency
-        }
-
+        setIsSubmitting(true);
         try {
-            const res = await axios.post("/api/budget", payload)
+            const res = await axios.post("/api/budget", {
+                category,
+                spendinglimit: Number(spendingLimit),
+                frequency
+            });
             if (res.status === 201 || res.status === 200) {
-                router.push("/Budget")
+                router.push("/Budget");
             }
-        }
-
-        catch (err) {
+        } catch (err) {
             console.error(err);
             alert("Something went wrong");
+        } finally {
+            setIsSubmitting(false);
         }
+    };
 
-    }
     return (
-        <div className="max-w-3xl mx-auto mt-8 text-white">
-            <div className="mb-6">
-                <h1 className="text-2xl font-semibold">Create New Budget</h1>
-                <p className="text-sm text-gray-400 mt-1">
-                    Define a new spending limit to keep your finances on track.
-                </p>
-            </div>
+        <div className="max-w-2xl mx-auto py-8">
+            <button
+                onClick={() => router.back()}
+                className="flex items-center text-sm text-muted-foreground hover:text-foreground mb-6 transition-colors"
+            >
+                <ChevronLeft size={16} className="mr-1" /> Back to Budgets
+            </button>
 
-            <div className="bg-[#161d2f] border border-gray-700 rounded-xl p-6">
-                <form className="space-y-6" onSubmit={(e) => e.preventDefault()}>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="bg-card border border-border rounded-xl shadow-lg overflow-hidden">
+                <div className="p-6 border-b border-border bg-secondary/30">
+                    <h1 className="text-2xl font-bold tracking-tight text-foreground">Create Budget</h1>
+                    <p className="text-sm text-muted-foreground mt-1">Set a spending limit for a specific category.</p>
+                </div>
 
+                <form onSubmit={handleSubmit} className="p-6 space-y-6">
+                    <div className="space-y-2">
+                        <label className="text-sm font-medium">Category</label>
+                        <select
+                            value={category}
+                            onChange={(e) => setCategory(e.target.value)}
+                            className="w-full px-3 py-2 rounded-lg border border-input bg-background focus:ring-2 focus:ring-primary outline-none transition-all"
+                        >
+                            <option value="">Select a category</option>
+                            {categories.map((c) => (
+                                <option key={c} value={c}>{c}</option>
+                            ))}
+                        </select>
+                    </div>
 
-                        <div>
-                            <label className="text-sm font-medium">Category</label>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium">Spending Limit (₹)</label>
+                            <input
+                                type="number"
+                                value={spendingLimit}
+                                onChange={(e) => setSpendingLimit(e.target.value)}
+                                placeholder="0.00"
+                                className="w-full px-3 py-2 rounded-lg border border-input bg-background focus:ring-2 focus:ring-primary outline-none transition-all"
+                            />
+                        </div>
+
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium">Reset Frequency</label>
                             <select
-                                value={category}
-                                onChange={(e) => setcategory(e.target.value)}
-                                className="mt-1 w-full bg-[#101622] border border-gray-700 rounded-lg px-3 py-2 text-sm outline-none focus:border-blue-500"
+                                value={frequency}
+                                onChange={(e) => setFrequency(e.target.value)}
+                                className="w-full px-3 py-2 rounded-lg border border-input bg-background focus:ring-2 focus:ring-primary outline-none transition-all"
                             >
-                                <option value="">Select a category</option>
-                                <option value="Food">Food</option>
-                                <option value="Transport">Transport</option>
-                                <option value="Entertainment">Entertainment</option>
-                                <option value="Shopping">Shopping</option>
-                                <option value="Transport">Transport</option>
-                                <option value="Groceries">Groceries</option>
-                                <option value="Education">Education</option>
-                                <option value="Business">Business</option>
-                                <option value="Healthcare">Healthcare</option>
-                                <option value="Utilities">Utilities</option>
-                                <option value="Travel">Travel</option>
-                                <option value="Pets">Pets</option>
-                                <option value="Others">Others</option>
+                                <option value="Monthly">Monthly</option>
+                                <option value="Weekly">Weekly</option>
+                                <option value="Yearly">Yearly</option>
                             </select>
-
                         </div>
                     </div>
 
-                    <div>
-                        <p className="text-xs uppercase tracking-wide text-gray-400 mb-3">
-                            Limits & Frequency
-                        </p>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <label className="text-sm font-medium">
-                                    Spending Limit <span className="text-red-500">*</span>
-                                </label>
-                                <input
-                                    type="number"
-                                    value={spendinglimit}
-                                    onChange={(e) => setspendinglimit(Number(e.target.value))}
-                                    placeholder="₹ 0.00"
-                                    className="mt-1 w-full bg-[#101622] border border-gray-700 rounded-lg px-3 py-2 text-sm outline-none focus:border-blue-500"
-                                />
-                                <p className="text-xs text-gray-400 mt-1">
-                                    The maximum amount you plan to spend.
-                                </p>
-                            </div>
-
-                            <div>
-                                <label className="text-sm font-medium">
-                                    Frequency <span className="text-red-500">*</span>
-                                </label>
-                                <select className="mt-1 w-full bg-[#101622] border border-gray-700 rounded-lg px-3 py-2 text-sm outline-none focus:border-blue-500"
-                                    value={Frequency}
-                                    onChange={(e) => setfrequency(e.target.value)}>
-                                    <option value="Monthly">Monthly</option>
-                                    <option value="Weekly">Weekly</option>
-                                    <option value="Yearly">Yearly</option>
-
-                                </select>
-                                <p className="text-xs text-gray-400 mt-1">
-                                    Resets automatically at the start of the period.
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-
-
-                    <div className="flex justify-end gap-3 pt-4">
+                    <div className="pt-4 flex items-center justify-end gap-3">
                         <button
                             type="button"
-                            className="px-4 py-2 rounded-lg text-sm text-gray-300 hover:text-white"
+                            onClick={() => router.back()}
+                            className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
                         >
                             Cancel
                         </button>
                         <button
-                            onClick={handleSubmit}
-                            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 transition text-sm font-medium"
+                            type="submit"
+                            disabled={isSubmitting}
+                            className="px-6 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:bg-primary/90 transition-all shadow-sm disabled:opacity-50"
                         >
-                            Save Budget
+                            {isSubmitting ? "Creating..." : "Create Budget"}
                         </button>
                     </div>
                 </form>

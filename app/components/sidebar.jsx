@@ -1,62 +1,90 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { LayoutDashboard, Receipt, BarChart3, Wallet, Settings, Home } from "lucide-react";
+import clsx from "clsx";
 
 const Sidebar = ({ isOpen }) => {
     const router = useRouter();
+    const pathname = usePathname();
+
+    const navItems = [
+        { label: "Dashboard", path: "/home", icon: LayoutDashboard },
+        { label: "Transactions", path: "/expenses", icon: Receipt },
+        { label: "Analytics", path: "/analytics", icon: BarChart3 },
+        { label: "Budgets", path: "/Budget", icon: Wallet },
+        { label: "Settings", path: "/settings", icon: Settings },
+    ];
 
     return (
         <>
-            {/* MOBILE NAVBAR */}
-            <div className="fixed top-14 left-0 w-full bg-[#111318] p-2 flex justify-around text-white sm:hidden z-50">
-                <button onClick={() => router.push("/users")}>Home</button>
-                <button onClick={() => router.push("/expenses")}>Transactions</button>
-                <button onClick={() => router.push("/analytics")}>Analytics</button>
-                <button onClick={() => router.push("/budget")}>Budget</button>
-                <button onClick={() => router.push("/settings")}>Settings</button>
-            </div>
-
             {/* DESKTOP SIDEBAR */}
             <aside
-                className={`
-          fixed  left-0 h-full bg-[#111318] border-r border-gray-800
-          text-white z-40 transition-all duration-300
-          w-64 hidden sm:block
-        `}
+                className={clsx(
+                    "fixed top-16 left-0 h-[calc(100vh-64px)] bg-background/50 backdrop-blur-sm border-r border-border",
+                    "hidden md:block w-64 transition-all duration-300 z-40"
+                )}
             >
-                <nav className="flex flex-col gap-2 p-6">
-                    {[
-                        ["Home", "/home"],
-                        ["Transactions", "/expenses"],
-                        ["Analytics", "/analytics"],
-                        ["Budget", "/Budget"],
-                        ["Settings", "/settings"],
-                    ].map(([label, path]) => (
-                        <button
-                            key={path}
-                            onClick={() => router.push(path)}
-                            className="px-4 py-3 rounded-md hover:bg-slate-950 text-left"
-                        >
-                            {label}
-                        </button>
-                    ))}
+                <nav className="flex flex-col gap-2 p-4 h-full">
+                    {navItems.map((item) => {
+                        const Icon = item.icon;
+                        const isActive = pathname === item.path;
+
+                        return (
+                            <button
+                                key={item.path}
+                                onClick={() => router.push(item.path)}
+                                className={clsx(
+                                    "flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200",
+                                    isActive
+                                        ? "bg-primary text-primary-foreground shadow-md shadow-primary/20"
+                                        : "text-muted-foreground hover:bg-secondary hover:text-foreground"
+                                )}
+                            >
+                                <Icon size={20} />
+                                {item.label}
+                            </button>
+                        );
+                    })}
                 </nav>
             </aside>
 
-            {/* MOBILE SLIDE-IN SIDEBAR */}
+            {/* MOBILE SIDEBAR (Slide Over) */}
+            <div
+                className={clsx(
+                    "fixed inset-0 z-40 bg-black/50 backdrop-blur-sm transition-opacity md:hidden",
+                    isOpen ? "opacity-100" : "opacity-0 pointer-events-none"
+                )}
+                aria-hidden="true"
+            />
+
             <aside
-                className={`
-          fixed top-14 left-0 h-full bg-[#111318] border-r border-gray-800
-          text-white z-40 transition-all duration-300 sm:hidden
-          ${isOpen ? "w-64 p-6" : "w-0 p-0 overflow-hidden"}
-        `}
+                className={clsx(
+                    "fixed top-16 left-0 h-[calc(100vh-64px)] w-64 bg-background border-r border-border shadow-xl z-50 transition-transform duration-300 md:hidden",
+                    isOpen ? "translate-x-0" : "-translate-x-full"
+                )}
             >
-                <nav className="flex flex-col gap-2">
-                    <button onClick={() => router.push("/users")}>Home</button>
-                    <button onClick={() => router.push("/expenses")}>Transactions</button>
-                    <button onClick={() => router.push("/analytics")}>Analytics</button>
-                    <button onClick={() => router.push("/budget")}>Budget</button>
-                    <button onClick={() => router.push("/settings")}>Settings</button>
+                <nav className="flex flex-col gap-2 p-4">
+                    {navItems.map((item) => {
+                        const Icon = item.icon;
+                        const isActive = pathname === item.path;
+
+                        return (
+                            <button
+                                key={item.path}
+                                onClick={() => router.push(item.path)}
+                                className={clsx(
+                                    "flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200",
+                                    isActive
+                                        ? "bg-primary text-primary-foreground"
+                                        : "text-muted-foreground hover:bg-secondary hover:text-foreground"
+                                )}
+                            >
+                                <Icon size={20} />
+                                {item.label}
+                            </button>
+                        );
+                    })}
                 </nav>
             </aside>
         </>
