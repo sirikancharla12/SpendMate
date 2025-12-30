@@ -9,7 +9,7 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #020617;
+    --background: rgb(16,22,34);
     /* --background: #f3f8fe; */
 
     --foreground: #ededed;
@@ -22,6 +22,18 @@
   background-position: center; /* Centers the background */
        width: max-content;
        height: max-content;          /* Full screen width */
+}
+
+.nav-btn {
+  padding: 12px 16px;
+  border-radius: 8px;
+  text-align: left;
+  font-weight: 500;
+  /* transition: background 0.2s ease; */
+}
+
+.nav-btn:hover {
+  background: #000;
 }
 
 

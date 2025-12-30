@@ -12,23 +12,24 @@ model User {
   email         String    @unique
   name          String?
   image         String?
-  password      String?  // Optional for users who log in with credentials
+  password      String? 
   emailVerified DateTime?
   provider String @default("credentials")
-  googleId      String? @unique  // Optional if using Google authentication
-  updatedAt     DateTime @updatedAt // Automatically updates on changes
-  accounts      Account[]  // Links to OAuth accounts (like Google)
+  googleId      String? @unique  
+  updatedAt     DateTime @updatedAt 
+  accounts      Account[]  
   expenses      Expense[] 
-  savings Savings[] // One-to-many relation with Expense
+  savings Savings[] 
+  budegt Budget[] 
 }
 
 model Account {
   id                 String   @id @default(cuid())
   userId             String
   provider           String
-  providerAccountId  String?  // This can store the unique provider account ID
-  providerId         String?  // Optional for existing rows
-  providerType       String?  // Optional for existing rows
+  providerAccountId  String?  
+  providerId         String? 
+  providerType       String? 
   refresh_token      String? @db.Text
   access_token       String? @db.Text
   expires_at         Int?
@@ -36,10 +37,10 @@ model Account {
   scope              String?
   id_token           String? @db.Text
   session_state      String?
-  updatedAt          DateTime? @updatedAt // Automatically updates on changes
+  updatedAt          DateTime? @updatedAt
   user               User     @relation(fields: [userId], references: [id])
 
-  @@unique([provider, providerAccountId]) // Ensure the combination of provider and accountId is unique
+  @@unique([provider, providerAccountId]) 
 }
 
 model Expense {
@@ -65,4 +66,13 @@ model Savings{
   amountSaved Float
   userId String
   user User @relation(fields: [userId],references: [id])
+}
+
+model Budget{
+  id String @id @default(cuid())
+category String
+spendinglimit Float
+frequency String
+userId String
+user User @relation(fields: [userId],references: [id])
 }

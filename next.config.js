@@ -1,13 +1,6 @@
-const { resolve } = require('path');
-require('ts-node').register({
-  transpileOnly: true,
-  compilerOptions: {
-    module: 'commonjs',
-  },
-});
-
-// module.exports = require(resolve('./next.config.ts'));
-module.exports = {
+/** @type {import('next').NextConfig} */
+const nextConfig = {
   reactStrictMode: true,
 };
 
+module.exports = nextConfig;
