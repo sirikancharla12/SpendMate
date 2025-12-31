@@ -48,7 +48,23 @@ export async function POST(req) {
             return NextResponse.json({ error: "User not found" }, { status: 404 });
         }
 
+
+
         const normalizedCategory = category.trim().toLowerCase();
+
+        const existingCategory = await prisma.budget.findFirst({
+  where: {
+    userId: existingUser.id,
+    category: normalizedCategory,
+  },
+});
+
+if (existingCategory) {
+  return NextResponse.json(
+    { error: `Budget for ${category} already exists` },
+    { status: 409 }
+  );
+}
 
         const createdBudget = await prisma.budget.create({
             data: {

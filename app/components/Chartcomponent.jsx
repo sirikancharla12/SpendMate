@@ -37,6 +37,12 @@ const ExpensesChart = ({ transactions }) => {
         labels: [],
         datasets: [],
     });
+    // State for Doughnut Chart
+    const [doughnutData, setDoughnutData] = useState({
+        labels: [],
+        datasets: [],
+    });
+    const [totalExpense, setTotalExpense] = useState(0);
 
     useEffect(() => {
         const currentDate = new Date();
@@ -45,6 +51,7 @@ const ExpensesChart = ({ transactions }) => {
         let incomeData = [];
         let expenseData = [];
 
+        // Logic to determine filtered date range
         if (selectedFilter === "This Month") {
             const year = currentDate.getFullYear();
             const month = currentDate.getMonth();
@@ -54,20 +61,6 @@ const ExpensesChart = ({ transactions }) => {
             labels = Array.from({ length: lastDate }, (_, i) => (i + 1).toString());
             incomeData = new Array(lastDate).fill(0);
             expenseData = new Array(lastDate).fill(0);
-
-            const filteredTransactions = transactions.filter((transaction) => {
-                const date = new Date(transaction.date);
-                return date.getFullYear() === year && date.getMonth() === month;
-            });
-
-            filteredTransactions.forEach((transaction) => {
-                const day = new Date(transaction.date).getDate() - 1;
-                if (transaction.type === "Income") {
-                    incomeData[day] += transaction.amount;
-                } else {
-                    expenseData[day] += transaction.amount;
-                }
-            });
         }
         else if (selectedFilter === "Last 6 Months") {
             startDate = new Date(currentDate.getFullYear(), currentDate.getMonth() - 5, 1);
@@ -76,56 +69,81 @@ const ExpensesChart = ({ transactions }) => {
                 d.setMonth(currentDate.getMonth() - 5 + i);
                 return `${d.toLocaleString("default", { month: "short" })} ${d.getFullYear()}`;
             });
-
             incomeData = Array(6).fill(0);
             expenseData = Array(6).fill(0);
-
-            const filteredTransactions = transactions.filter((transaction) => {
-                const date = new Date(transaction.date);
-                return date >= startDate && date <= currentDate;
-            });
-
-            filteredTransactions.forEach((transaction) => {
-                const date = new Date(transaction.date);
-                const label = `${date.toLocaleString("default", { month: "short" })} ${date.getFullYear()}`;
-                const index = labels.indexOf(label);
-                if (index !== -1) {
-                    if (transaction.type === "Income") {
-                        incomeData[index] += transaction.amount;
-                    } else {
-                        expenseData[index] += transaction.amount;
-                    }
-                }
-            });
         }
         else if (selectedFilter === "This Year") {
             const year = currentDate.getFullYear();
             labels = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
             incomeData = new Array(12).fill(0);
             expenseData = new Array(12).fill(0);
-
-            const filteredTransactions = transactions.filter((transaction) => {
-                const date = new Date(transaction.date);
-                return date.getFullYear() === year;
-            });
-
-            filteredTransactions.forEach((transaction) => {
-                const monthIndex = new Date(transaction.date).getMonth();
-                if (transaction.type === "Income") {
-                    incomeData[monthIndex] += transaction.amount;
-                } else {
-                    expenseData[monthIndex] += transaction.amount;
-                }
-            });
         }
 
+        // Filter Transactions based on the selected time range
+        const filteredTransactions = transactions.filter((transaction) => {
+            const date = new Date(transaction.date);
+            if (selectedFilter === "This Month") {
+                return date.getFullYear() === currentDate.getFullYear() && date.getMonth() === currentDate.getMonth();
+            } else if (selectedFilter === "Last 6 Months") {
+                return date >= startDate && date <= currentDate;
+            } else if (selectedFilter === "This Year") {
+                return date.getFullYear() === currentDate.getFullYear();
+            }
+            return false;
+        });
+
+        // --- Doughnut Aggregation Logic ---
+        const categoryTotals = {};
+        let totalExp = 0;
+
+        console.log("Processing transactions:", filteredTransactions.length);
+
+        filteredTransactions.forEach((transaction) => {
+            const date = new Date(transaction.date);
+            const amount = Number(transaction.amount) || 0;
+            // Normalize type - API puts "Income" (PascalCase), checks were 'Income'. 
+            // Robust check: .toLowerCase() === 'income'
+            // Ensure transaction.type exists
+            const type = transaction.type ? transaction.type.toLowerCase() : "expense";
+
+            // Populate Line Chart Data (Expense/Income)
+            if (selectedFilter === "This Month") {
+                const day = date.getDate() - 1;
+                if (type === "income") incomeData[day] += amount;
+                else expenseData[day] += amount;
+            } else if (selectedFilter === "Last 6 Months") {
+                const label = `${date.toLocaleString("default", { month: "short" })} ${date.getFullYear()}`;
+                const index = labels.indexOf(label);
+                if (index !== -1) {
+                    if (type === "income") incomeData[index] += amount;
+                    else expenseData[index] += amount;
+                }
+            } else if (selectedFilter === "This Year") {
+                const monthIndex = date.getMonth();
+                if (type === "income") incomeData[monthIndex] += amount;
+                else expenseData[monthIndex] += amount;
+            }
+
+            // Populate Doughnut Data (Expenses Only)
+            if (type !== "income") {
+                const cat = transaction.category || "Uncategorized";
+                categoryTotals[cat] = (categoryTotals[cat] || 0) + amount;
+                totalExp += amount;
+            }
+        });
+
+        console.log("Calculated Total Expense:", totalExp);
+
+        setTotalExpense(totalExp);
+
+        // Update Line Chart State
         setChartData({
             labels,
             datasets: [
                 {
                     label: "Income",
                     data: incomeData,
-                    borderColor: "#10b981", // Fintech Green
+                    borderColor: "#10b981",
                     backgroundColor: "rgba(16, 185, 129, 0.1)",
                     fill: true,
                     tension: 0.4,
@@ -135,7 +153,7 @@ const ExpensesChart = ({ transactions }) => {
                 {
                     label: "Expenses",
                     data: expenseData,
-                    borderColor: "#ef4444", // Fintech Red
+                    borderColor: "#ef4444",
                     backgroundColor: "rgba(239, 68, 68, 0.1)",
                     fill: true,
                     tension: 0.4,
@@ -144,7 +162,54 @@ const ExpensesChart = ({ transactions }) => {
                 },
             ],
         });
-    }, [selectedFilter, transactions]);
+
+        // Update Doughnut Chart State (Top 3 + Others)
+        const sortedCategories = Object.entries(categoryTotals)
+            .sort(([, a], [, b]) => b - a);
+
+        const top3 = sortedCategories.slice(0, 3);
+        const others = sortedCategories.slice(3);
+
+        const dLabels = top3.map(([cat]) => cat.charAt(0).toUpperCase() + cat.slice(1));
+        const dValues = top3.map(([, amt]) => amt);
+
+        if (others.length > 0) {
+            const othersTotal = others.reduce((sum, [, amt]) => sum + amt, 0);
+            dLabels.push("Others");
+            dValues.push(othersTotal);
+        }
+
+        if (dValues.length === 0) {
+            setDoughnutData({
+                labels: ["No Expenses"],
+                datasets: [{
+                    data: [1],
+                    backgroundColor: ["#e2e8f0"],
+                    borderColor: isDark ? "#1e293b" : "#ffffff",
+                    borderWidth: 2,
+                }]
+            });
+        } else {
+            setDoughnutData({
+                labels: dLabels,
+                datasets: [
+                    {
+                        data: dValues,
+                        backgroundColor: [
+                            "#3b82f6", // Blue
+                            "#10b981", // Green
+                            "#f59e0b", // Yellow
+                            "#6366f1", // Indigo
+                        ],
+                        borderColor: isDark ? "#1e293b" : "#ffffff",
+                        borderWidth: 2,
+                        hoverOffset: 6,
+                    },
+                ],
+            });
+        }
+
+    }, [selectedFilter, transactions, isDark]);
 
     const options = {
         responsive: true,
@@ -191,23 +256,6 @@ const ExpensesChart = ({ transactions }) => {
         },
     };
 
-    const doughnutData = {
-        labels: ["Food", "Travel", "Shopping"],
-        datasets: [
-            {
-                data: [300, 50, 100],
-                backgroundColor: [
-                    "#3b82f6",
-                    "#10b981",
-                    "#f59e0b",
-                ],
-                borderColor: isDark ? "#1e293b" : "#ffffff",
-                borderWidth: 2,
-                hoverOffset: 6,
-            },
-        ],
-    };
-
     const doughnutOptions = {
         responsive: true,
         maintainAspectRatio: false,
@@ -228,7 +276,7 @@ const ExpensesChart = ({ transactions }) => {
     const doughnutCenterText = {
         id: "doughnutCenterText",
         afterDraw(chart) {
-            const { ctx, chartArea, data } = chart;
+            const { ctx, chartArea } = chart;
             const centerX = (chartArea.left + chartArea.right) / 2;
             const centerY = (chartArea.top + chartArea.bottom) / 2;
             ctx.save();
@@ -239,7 +287,7 @@ const ExpensesChart = ({ transactions }) => {
             ctx.fillText("Total", centerX, centerY - 10);
             ctx.font = "700 16px sans-serif";
             ctx.fillStyle = isDark ? "#ffffff" : "#0f172a";
-            ctx.fillText(`₹450`, centerX, centerY + 10); // Mock total for now
+            ctx.fillText(`₹${totalExpense.toLocaleString()}`, centerX, centerY + 10);
             ctx.restore();
         }
     }
@@ -262,8 +310,8 @@ const ExpensesChart = ({ transactions }) => {
                             <button
                                 key={filter}
                                 className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all ${selectedFilter === filter
-                                        ? "bg-background text-foreground shadow-sm"
-                                        : "text-muted-foreground hover:text-foreground"
+                                    ? "bg-background text-foreground shadow-sm"
+                                    : "text-muted-foreground hover:text-foreground"
                                     }`}
                                 onClick={() => setSelectedFilter(filter)}
                             >
@@ -288,7 +336,7 @@ const ExpensesChart = ({ transactions }) => {
                         data={doughnutData}
                         options={doughnutOptions}
                         plugins={[doughnutCenterText]}
-                        key={theme + "-doughnut"}
+                        key={`${theme}-doughnut-${totalExpense}`}
                     />
                 </div>
             </div>

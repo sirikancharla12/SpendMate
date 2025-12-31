@@ -1,16 +1,20 @@
 "use client";
-
+import React, { useState, useEffect } from "react";
 import { useTheme } from "next-themes";
-import { Line } from "react-chartjs-2";
+import { Doughnut, Line } from "react-chartjs-2";
+import Chart from "chart.js/auto";
+import { Filler } from "chart.js";
+
 import {
     Chart as ChartJS,
     CategoryScale,
     LinearScale,
     PointElement,
     LineElement,
+    ArcElement,
+    Title,
     Tooltip,
     Legend,
-    Filler,
 } from "chart.js";
 
 ChartJS.register(
@@ -18,50 +22,152 @@ ChartJS.register(
     LinearScale,
     PointElement,
     LineElement,
+    ArcElement,
+    Title,
     Tooltip,
     Legend,
     Filler
 );
 
-export default function SpendingActivty() {
+const SpendingActivity = ({ transactions = [] }) => {
     const { theme } = useTheme();
-
-    // Determine colors based on theme (simplified approach)
     const isDark = theme === "dark";
-    const gridColor = isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)";
-    const textColor = isDark ? "#9ca3af" : "#64748b";
+    const [chartData, setChartData] = useState({
+        labels: [],
+        datasets: [],
+    });
+    const [doughnutData, setDoughnutData] = useState({
+        labels: [],
+        datasets: [],
+    });
+    const [totalExpense, setTotalExpense] = useState(0);
 
-    const chartData = {
-        labels: ["Week 1", "Week 2", "Week 3", "Week 4"],
-        datasets: [
-            {
-                label: "Spent",
-                data: [300, 500, 200, 400],
-                borderColor: "#3b82f6", // Fintech Blue
-                borderWidth: 3,
-                tension: 0.4,
-                fill: true,
-                backgroundColor: (context) => {
-                    const chart = context.chart;
-                    const { ctx, chartArea } = chart;
-                    if (!chartArea) return null;
-                    const gradient = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
-                    gradient.addColorStop(0, "rgba(59, 130, 246, 0.25)");
-                    gradient.addColorStop(1, "rgba(59, 130, 246, 0.0)");
-                    return gradient;
+    useEffect(() => {
+        const currentDate = new Date();
+        const year = currentDate.getFullYear();
+        const month = currentDate.getMonth();
+
+        // --- Line Chart Logic (Weeks) ---
+        const labels = ["Week 1", "Week 2", "Week 3", "Week 4", "Week 5"];
+        const incomeData = [0, 0, 0, 0, 0];
+        const expenseData = [0, 0, 0, 0, 0];
+
+        // --- Doughnut Logic (Categories) ---
+        const categoryTotals = {};
+        let totalExp = 0;
+
+        const filteredTransactions = transactions.filter((transaction) => {
+            const date = new Date(transaction.date);
+            return date.getFullYear() === year && date.getMonth() === month;
+        });
+
+        filteredTransactions.forEach((transaction) => {
+            const date = new Date(transaction.date);
+            const day = date.getDate();
+            const amount = Number(transaction.amount) || 0;
+            const type = transaction.type ? transaction.type.toLowerCase() : "expense";
+
+            // Determine week index (0-based)
+            let weekIndex = Math.floor((day - 1) / 7);
+            if (weekIndex > 4) weekIndex = 4;
+
+            if (type === "income") {
+                incomeData[weekIndex] += amount;
+            } else {
+                expenseData[weekIndex] += amount;
+
+                // Aggregate for Doughnut
+                const cat = transaction.category || "Uncategorized";
+                categoryTotals[cat] = (categoryTotals[cat] || 0) + amount;
+                totalExp += amount;
+            }
+        });
+
+        setTotalExpense(totalExp);
+
+        setChartData({
+            labels,
+            datasets: [
+                {
+                    label: "Income",
+                    data: incomeData,
+                    borderColor: "#10b981", // Fintech Green
+                    backgroundColor: "rgba(16, 185, 129, 0.1)",
+                    fill: true,
+                    tension: 0.4,
+                    borderWidth: 2,
+                    pointRadius: 2,
                 },
-                pointBackgroundColor: "#3b82f6",
-                pointBorderColor: isDark ? "#1e293b" : "#ffffff",
-                pointBorderWidth: 2,
-                pointRadius: 4,
-                pointHoverRadius: 6,
-            },
-        ],
-    };
+                {
+                    label: "Expenses",
+                    data: expenseData,
+                    borderColor: "#ef4444",
+                    backgroundColor: "rgba(239, 68, 68, 0.1)",
+                    fill: true,
+                    tension: 0.4,
+                    borderWidth: 2,
+                    pointRadius: 2,
+                },
+            ],
+        });
+
+        // --- Prepare Doughnut Data ---
+        // Sort descending
+        const sortedCategories = Object.entries(categoryTotals)
+            .sort(([, a], [, b]) => b - a);
+
+        // Take top 3
+        const top3 = sortedCategories.slice(0, 3);
+        const others = sortedCategories.slice(3);
+
+        const dLabels = top3.map(([cat]) => cat.charAt(0).toUpperCase() + cat.slice(1));
+        const dValues = top3.map(([, amt]) => amt);
+
+        if (others.length > 0) {
+            const othersTotal = others.reduce((sum, [, amt]) => sum + amt, 0);
+            dLabels.push("Others");
+            dValues.push(othersTotal);
+        }
+
+        if (dValues.length === 0) {
+            setDoughnutData({
+                labels: ["No Expenses"],
+                datasets: [{
+                    data: [1],
+                    backgroundColor: ["#e2e8f0"],
+                    borderColor: isDark ? "#1e293b" : "#ffffff",
+                    borderWidth: 2,
+                }]
+            });
+        } else {
+            setDoughnutData({
+                labels: dLabels,
+                datasets: [
+                    {
+                        data: dValues,
+                        backgroundColor: [
+                            "#3b82f6", 
+                            "#10b981", 
+                            "#f59e0b", 
+                            "#6366f1", 
+                        ],
+                        borderColor: isDark ? "#1e293b" : "#ffffff",
+                        borderWidth: 2,
+                        hoverOffset: 6,
+                    },
+                ],
+            });
+        }
+
+    }, [transactions, isDark]);
 
     const options = {
         responsive: true,
         maintainAspectRatio: false,
+        interaction: {
+            mode: "index",
+            intersect: false,
+        },
         plugins: {
             legend: { display: false },
             tooltip: {
@@ -71,38 +177,61 @@ export default function SpendingActivty() {
                 borderColor: isDark ? "#334155" : "#e2e8f0",
                 borderWidth: 1,
                 padding: 10,
-                displayColors: false,
+                displayColors: true,
                 callbacks: {
-                    label: (context) => `Spent: ₹${context.raw}`
-                }
+                    label: (ctx) => `${ctx.dataset.label}: ₹${ctx.parsed.y}`,
+                },
             },
         },
         scales: {
             x: {
+                ticks: {
+                    color: isDark ? "#9ca3af" : "#64748b",
+                    font: { size: 11 },
+                },
                 grid: { display: false },
-                ticks: { color: textColor, font: { size: 12 } },
             },
             y: {
-                grid: { color: gridColor, borderDash: [4, 4] },
-                ticks: { display: false },
+                ticks: {
+                    color: isDark ? "#9ca3af" : "#64748b",
+                    font: { size: 11 },
+                    callback: (v) => `₹${v}`,
+                },
+                grid: {
+                    color: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)",
+                    borderDash: [4, 4],
+                },
                 border: { display: false }
             },
         },
     };
 
+   
+
+ 
+
     return (
-        <div className="bg-card text-card-foreground rounded-xl border border-border shadow-sm p-6 w-full h-[400px]">
-            <div className="flex items-center justify-between mb-6">
-                <div>
-                    <h2 className="text-lg font-semibold tracking-tight">Spending Activity</h2>
-                    <p className="text-sm text-muted-foreground">Weekly Overview</p>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
+            <div className="lg:col-span-3 bg-card text-card-foreground border border-border p-6 rounded-xl shadow-sm">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
+                    <div>
+                        <h2 className="text-lg font-semibold tracking-tight">
+                            Spending Activity
+                        </h2>
+                        <p className="text-sm text-muted-foreground">
+                            Weekly Overview
+                        </p>
+                    </div>
                 </div>
-                {/* Optional: Filter Dropdown could go here */}
+
+                <div className="h-[300px]">
+                    <Line data={chartData} options={options} key={theme} />
+                </div>
             </div>
 
-            <div className="h-[300px] w-full">
-                <Line data={chartData} options={options} key={theme} />
-            </div>
+        
         </div>
     );
 }
+
+export default SpendingActivity;

@@ -2,19 +2,49 @@
 
 import { useSession } from "next-auth/react";
 import { Download } from "lucide-react";
-import Image from "next/image";
 import Workspace from "app/components/workspace";
+import { useState } from "react";
+
+const PERIOD_MAP = {
+  "This Month": "THIS_MONTH",
+  "Last 6 Months": "LAST_6_MONTHS",
+  "This Year": "THIS_YEAR",
+};
 
 const UserPage = () => {
-    const { data: session } = useSession();
+  const { data: session } = useSession();
+  const [period, setPeriod] = useState("This Month");
 
-    if (!session || !session.user) {
-        return (
-            <div className="flex justify-center items-center h-[80vh]">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-            </div>
-        );
+  if (!session || !session.user) {
+    return (
+      <div className="flex justify-center items-center h-[80vh]">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+  const handleExport = async () => {
+    try {
+      const range = PERIOD_MAP[period];
+
+      const res = await fetch(`/api/report/export?range=${range}`);
+      if (!res.ok) throw new Error("Failed to export report");
+
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `spendmate-${range.toLowerCase()}.csv`;
+      document.body.appendChild(a);
+      a.click();
+
+      a.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error(err);
+      alert("Could not export report");
     }
+  };
 
     return (
         <div className="space-y-8 fade-in">
@@ -35,7 +65,8 @@ const UserPage = () => {
                         <span className="text-foreground">This Month</span>
                     </div>
 
-                    <button className="flex items-center gap-2 px-4 py-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors shadow-sm font-medium text-sm">
+                    <button className="flex items-center gap-2 px-4 py-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors shadow-sm font-medium text-sm"
+                    onClick={handleExport}>
                         <Download size={16} />
                         Export Report
                     </button>

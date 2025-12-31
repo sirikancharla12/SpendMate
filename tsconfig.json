@@ -37,7 +37,7 @@
     "next-env.d.ts",
     "types",
     ".next/types/**/*.ts"
-  ],
+, "app/api/report/export/route.js"  ],
   "exclude": [
     "node_modules"
   ]
