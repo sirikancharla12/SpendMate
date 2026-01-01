@@ -1,14 +1,14 @@
 "use client";
 
-
 import dynamic from "next/dynamic";
+import { useEffect, useState } from "react";
+
 
 const TextHoverEffect = dynamic(
   () => import("components/ui/text-hover-effect"),
   { ssr: false }
 );
 
-import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -45,6 +45,12 @@ const faqs = [
 export default function Home() {
     const router = useRouter();
     const [openIndex, setOpenIndex] = useState(null);
+    const [mounted, setMounted] = useState(false);
+
+useEffect(() => {
+  setMounted(true);
+}, []);
+
 
     const toggleFAQ = (index) => {
         setOpenIndex(openIndex === index ? null : index);
@@ -262,9 +268,12 @@ export default function Home() {
             <footer className="border-t border-border bg-background py-12 px-6">
                 <div className="mx-auto max-w-7xl flex flex-col items-center gap-6 text-center overflow-visible">
 
-                    <div className="w-full flex justify-center overflow-visible">
-                        <TextHoverEffect text="SpendMate" />
-                    </div>
+                 {mounted && (
+  <div className="w-full flex justify-center">
+    <TextHoverEffect text="SpendMate" />
+  </div>
+)}
+
 
                     <p className="text-sm text-muted-foreground">
                         Track smarter. Spend better.
