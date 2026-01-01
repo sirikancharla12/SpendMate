@@ -11,38 +11,16 @@ export default function SignIn() {
     const [error, setError] = useState("");
     const [currentIndex, setCurrentIndex] = useState(0);
 
-    const slides = [
-        {
-            title: "Take Control of Your Finances",
-            text: "Track your income and expenses effortlessly.",
-            bg: "bg-gradient-to-br from-indigo-500 to-purple-600"
-        },
-        {
-            title: "Smart Budgeting",
-            text: "Stay ahead of your expenses with easy tools.",
-            bg: "bg-gradient-to-br from-blue-500 to-teal-400"
-        },
-        {
-            title: "Visualize Spending",
-            text: "Interactive charts help you understand money flow.",
-            bg: "bg-gradient-to-br from-rose-500 to-orange-400"
-        },
-    ];
+    
 
-    useEffect(() => {
-        const interval = setInterval(() => {
-            setCurrentIndex((prevIndex) => (prevIndex + 1) % slides.length);
-        }, 5000); // 5 seconds
-        return () => clearInterval(interval);
-    }, []);
+ 
 
     return (
         <div className="flex h-screen w-full bg-background overflow-hidden">
             {/* Sign-in Form */}
-            <div className="w-full lg:w-1/2 flex items-center justify-center p-8 sm:p-12 overflow-y-auto">
+            <div className="w-full  flex items-center justify-center p-8 sm:p-12 overflow-y-auto">
                 <div className="w-full max-w-md space-y-8">
                     <div className="text-center">
-                        <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-primary text-primary-foreground font-bold text-2xl mb-4">S</div>
                         <h2 className="text-3xl font-bold tracking-tight text-foreground">Welcome back</h2>
                         <p className="text-sm text-muted-foreground mt-2">Enter your credentials to access your account</p>
                     </div>
@@ -114,32 +92,7 @@ export default function SignIn() {
                 </div>
             </div>
 
-            {/* Side Image Section */}
-            <div className={`hidden lg:flex w-1/2 relative overflow-hidden transition-all duration-1000 ${slides[currentIndex].bg}`}>
-                <AnimatePresence mode="wait">
-                    <motion.div
-                        key={currentIndex}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -20 }}
-                        transition={{ duration: 0.5 }}
-                        className="absolute inset-0 flex flex-col items-center justify-center text-white p-12 text-center"
-                    >
-                        <h2 className="text-4xl font-bold mb-4 drop-shadow-md">{slides[currentIndex].title}</h2>
-                        <p className="text-lg opacity-90 max-w-md drop-shadow-sm">{slides[currentIndex].text}</p>
-                    </motion.div>
-                </AnimatePresence>
-
-                {/* Dots */}
-                <div className="absolute bottom-8 left-0 right-0 flex justify-center gap-2">
-                    {slides.map((_, index) => (
-                        <div
-                            key={index}
-                            className={`w-2 h-2 rounded-full transition-all ${currentIndex === index ? "bg-white w-6" : "bg-white/50"}`}
-                        />
-                    ))}
-                </div>
-            </div>
+            
         </div>
     );
 }
