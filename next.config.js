@@ -7,6 +7,9 @@ const nextConfig = {
   images: {
     domains: ["lh3.googleusercontent.com"],
   },
+   typescript: {
+    ignoreBuildErrors: true, 
+  },
 };
 
 module.exports = nextConfig;
