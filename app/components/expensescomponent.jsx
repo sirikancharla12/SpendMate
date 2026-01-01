@@ -5,6 +5,7 @@ import axios from "axios";
 import { useRouter } from "next/navigation";
 import { Plus, Search, Filter, Loader2, X, Trash2, ArrowUpRight, ArrowDownLeft, MoreHorizontal } from "lucide-react";
 import clsx from "clsx";
+import { useAlert } from "../context/AlertContext"; // Import useAlert
 
 const Expenses = ({ transactions, setTransactions }) => {
     const router = useRouter();
@@ -21,6 +22,8 @@ const Expenses = ({ transactions, setTransactions }) => {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [editingTransactionId, setEditingTransactionId] = useState(null);
     const [errorMessage, setErrorMessage] = useState(null);
+    const [isDeleting, setIsDeleting] = useState(null); // Track which ID is deleting
+    const { showAlert } = useAlert(); // Hook
 
     const toggleVisibility = () => setFormVisible(!isFormVisible);
 
@@ -94,16 +97,24 @@ const Expenses = ({ transactions, setTransactions }) => {
 
     const handleDeleteTransaction = async (e, id) => {
         e.stopPropagation();
-        if (!confirm("Are you sure you want to delete this transaction?")) return;
 
-        try {
-            await axios.delete(`/api/expenses/${id}`);
-            setTransactions((prev) => prev.filter((t) => t.id !== id));
-            router.refresh();
-        } catch (error) {
-            console.error("Failed to delete transaction", error);
-            alert("Failed to delete transaction");
-        }
+        showAlert(
+            "Are you sure you want to delete this transaction?",
+            "warning",
+            "Confirm Deletion",
+            async () => {
+                setIsDeleting(id);
+                try {
+                    await axios.delete(`/api/expenses/${id}`);
+                    setTransactions((prev) => prev.filter((t) => t.id !== id));
+                    router.refresh();
+                } catch (error) {
+                    console.error("Failed to delete transaction", error);
+                } finally {
+                    setIsDeleting(null);
+                }
+            }
+        );
     };
 
     const filteredTransactions = transactions.filter((t) =>
@@ -202,9 +213,10 @@ const Expenses = ({ transactions, setTransactions }) => {
                                 <div className="col-span-1 text-right">
                                     <button
                                         onClick={(e) => handleDeleteTransaction(e, t.id)}
-                                        className="p-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-md transition-colors opacity-0 group-hover:opacity-100"
+                                        disabled={isDeleting === t.id}
+                                        className="p-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-md transition-colors opacity-0 group-hover:opacity-100 disabled:opacity-50"
                                     >
-                                        <Trash2 size={16} />
+                                        {isDeleting === t.id ? <Loader2 size={16} className="animate-spin" /> : <Trash2 size={16} />}
                                     </button>
                                 </div>
                             </div>

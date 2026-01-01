@@ -13,6 +13,7 @@ import {
     CheckCircle2
 } from "lucide-react";
 import Image from "next/image";
+import { TextHoverEffect } from "components/ui/text-hover-effect";
 
 const faqs = [
     {
@@ -47,8 +48,8 @@ export default function Home() {
             <nav className="sticky top-0 z-50 w-full border-b border-border/50 bg-background/80 backdrop-blur-xl supports-[backdrop-filter]:bg-background/60 text-foreground">
                 <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center shadow-lg shadow-primary/20">
-                            <span className="text-primary-foreground font-bold text-lg">S</span>
+                        <div className="w-8 h-8 rounded-lg flex items-center justify-center overflow-hidden">
+                            <Image src="/logo.png" alt="SpendMate Logo" width={32} height={32} className="object-cover" />
                         </div>
                         <span className="text-xl font-bold tracking-tight">SpendMate</span>
                     </div>
@@ -78,10 +79,7 @@ export default function Home() {
 
                 <div className="max-w-7xl mx-auto px-6 grid lg:grid-cols-2 gap-12 items-center">
                     <div className="text-center lg:text-left">
-                        <div className="inline-flex items-center rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-sm font-medium text-primary mb-6">
-                            <span className="flex h-2 w-2 rounded-full bg-primary mr-2"></span>
-                            Smart Financial Tracking v2.0
-                        </div>
+
                         <h1 className="text-5xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight text-foreground mb-6 leading-[1.1]">
                             Master Your <br />
                             <span className="text-primary bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-600">Money Flow</span>
@@ -94,15 +92,9 @@ export default function Home() {
                                 Start Tracking Free
                                 <ArrowRight size={20} />
                             </button>
-                            <button className="inline-flex items-center justify-center gap-2 bg-card border border-border text-foreground px-8 py-4 rounded-xl text-lg font-semibold hover:bg-secondary/50 transition-all">
-                                View Demo
-                            </button>
                         </div>
 
-                        <div className="mt-10 flex items-center justify-center lg:justify-start gap-8 opacity-70 grayscale hover:grayscale-0 transition-all duration-500">
-                            {/* Simple logos placeholder */}
-                            <span className="text-lg font-bold text-muted-foreground">Trusted by users from 50+ countries</span>
-                        </div>
+                       
                     </div>
 
                     <div className="relative mx-auto w-full max-w-[500px] lg:max-w-none">
@@ -259,28 +251,26 @@ export default function Home() {
                 </div>
             </section>
 
-            {/* Footer */}
-            <footer className="border-t border-border bg-background py-12 px-6">
-                <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
-                    <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
-                            <span className="text-primary-foreground font-bold">S</span>
-                        </div>
-                        <span className="font-bold text-lg">SpendMate</span>
-                    </div>
+     <footer className="border-t border-border bg-background py-12 px-6">
+  <div className="mx-auto max-w-7xl flex flex-col items-center gap-6 text-center overflow-visible">
 
-                    <div className="flex gap-8 text-sm text-muted-foreground">
-                        <Link href="#" className="hover:text-foreground">Privacy</Link>
-                        <Link href="#" className="hover:text-foreground">Terms</Link>
-                        <Link href="#" className="hover:text-foreground">Contact</Link>
-                        <Link href="#" className="hover:text-foreground">Twitter</Link>
-                    </div>
+    {/* FIXED wrapper */}
+    <div className="w-full flex justify-center overflow-visible">
+      <TextHoverEffect text="SpendMate" />
+    </div>
 
-                    <p className="text-sm text-muted-foreground">
-                        © {new Date().getFullYear()} SpendMate. All rights reserved.
-                    </p>
-                </div>
-            </footer>
+    <p className="text-sm text-muted-foreground">
+      Track smarter. Spend better.
+    </p>
+
+    <p className="text-xs text-muted-foreground">
+      © 2025 SpendMate. All rights reserved.
+    </p>
+
+  </div>
+</footer>
+
+
         </div>
     );
 }

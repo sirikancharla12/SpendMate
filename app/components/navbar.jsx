@@ -27,8 +27,8 @@ export default function Navbar({ isSidebarOpen, setIsSidebarOpen }) {
 
                 {/* LOGO */}
                 <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
-                        <span className="text-white font-bold text-lg">S</span>
+                    <div className="w-8 h-8 rounded-lg flex items-center justify-center overflow-hidden">
+                        <Image src="/logo.png" alt="SpendMate Logo" width={32} height={32} className="object-cover" />
                     </div>
                     <span className="text-xl font-bold tracking-tight text-foreground hidden sm:block">
                         SpendMate

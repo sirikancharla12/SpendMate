@@ -1,5 +1,7 @@
 import axios from "axios";
 import { useEffect, useState } from "react"
+import { useAlert } from "../context/AlertContext"; // Import useAlert
+import { Loader2 } from "lucide-react"; // Import Loader
 
 const SavingsTable = () => {
     const [displayInputs, setDisplayInputs] = useState(false);
@@ -16,6 +18,9 @@ const SavingsTable = () => {
     const [salary, setSalary] = useState(0);
     const [savingStatuses, setSavingStatuses] = useState([]);
     const [editSavingId, setEditSavingId] = useState(null); // Track the saving being edited
+    const { showAlert } = useAlert(); // Hook
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [isDeleting, setIsDeleting] = useState(null);
 
     const percentageOptions = [5, 10, 15, 20, 25, 30]; // Predefined saving percentages
 
@@ -124,12 +129,7 @@ const SavingsTable = () => {
         }
 
         if (updatedTotalSavings > savingsLimit && savingsLimit > 0) {
-            setWarningMessage("⚠️ Warning: Total savings exceed the set limit!");
-
-            setTimeout(() => {
-                setWarningMessage("");
-            }, 3000);
-
+            console.warn("Total savings exceed the set limit!");
             return;
         }
 
@@ -142,6 +142,7 @@ const SavingsTable = () => {
         };
 
         try {
+            setIsSubmitting(true);
             let response;
             if (editSavingId) {
                 console.log(`Updating saving with ID: ${editSavingId}`);
@@ -172,6 +173,8 @@ const SavingsTable = () => {
             });
         } catch (error) {
             console.error("Error saving data:", error);
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
@@ -181,10 +184,24 @@ const SavingsTable = () => {
         setEditSavingId(null);
     };
 
+
     function handleDelete(id) {
-        axios.delete(`/api/savings/${id}`).then(() => {
-            setSavingsList((prevSavings) => prevSavings.filter((saving) => saving.id !== id));
-        });
+        showAlert(
+            "Are you sure you want to delete this saving?",
+            "warning",
+            "Confirm Deletion",
+            async () => {
+                setIsDeleting(id);
+                try {
+                    await axios.delete(`/api/savings/${id}`);
+                    setSavingsList((prevSavings) => prevSavings.filter((saving) => saving.id !== id));
+                } catch (error) {
+                    console.error("Failed to delete saving", error);
+                } finally {
+                    setIsDeleting(null);
+                }
+            }
+        );
     }
 
     const handleEdit = (saving) => {
@@ -342,11 +359,11 @@ const SavingsTable = () => {
                                         className=" text-white  rounded hover:bg-blue-700"
                                         onClick={addSaving}
                                     >
-                                        {editSavingId ? (
+                                        {isSubmitting ? <Loader2 className="animate-spin h-7 w-7" /> : (editSavingId ? (
                                             <img src="/righttick.svg" alt="Update" className="h-7 w-7" />
                                         ) : (
                                             <img src="/righttick.svg" alt="Save" className="h-7 w-7" />
-                                        )}
+                                        ))}
                                     </button>
                                     <button
                                         className=" text-white  rounded hover:bg-gray-700 "
@@ -382,7 +399,7 @@ const SavingsTable = () => {
                                         onClick={() => handleDelete(saving.id)}
                                         className=" text-white rounded hover:bg-red-700"
                                     >
-                                        <img src="/delete.svg" alt="Delete" className="w-7 h-7" />
+                                        {isDeleting === saving.id ? <Loader2 className="animate-spin w-7 h-7" /> : <img src="/delete.svg" alt="Delete" className="w-7 h-7" />}
                                     </button>
                                 </td>
                             </tr>

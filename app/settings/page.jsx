@@ -57,7 +57,7 @@ const ProfileCard = () => {
                 </div>
 
                 <p className="mt-8 text-xs text-muted-foreground">
-                    Member since {new Date().getFullYear()} • SpendMate v1.0
+                    Member since {new Date().getFullYear()} 
                 </p>
             </div>
         </div>
