@@ -4,8 +4,8 @@
 import dynamic from "next/dynamic";
 
 const TextHoverEffect = dynamic(
-  () => import("components/ui/text-hover-effect").then(mod => mod.TextHoverEffect),
-  { ssr: false }
+    () => import("components/ui/text-hover-effect").then(mod => mod.TextHoverEffect),
+    { ssr: false }
 );
 
 
@@ -103,7 +103,7 @@ export default function Home() {
                             </button>
                         </div>
 
-                       
+
                     </div>
 
                     <div className="relative mx-auto w-full max-w-[500px] lg:max-w-none">
@@ -260,24 +260,23 @@ export default function Home() {
                 </div>
             </section>
 
-     <footer className="border-t border-border bg-background py-12 px-6">
-  <div className="mx-auto max-w-7xl flex flex-col items-center gap-6 text-center overflow-visible">
+            <footer className="border-t border-border bg-background py-12 px-6">
+                <div className="mx-auto max-w-7xl flex flex-col items-center gap-6 text-center overflow-visible">
 
-    {/* FIXED wrapper */}
-    <div className="w-full flex justify-center overflow-visible">
-      <TextHoverEffect text="SpendMate" />
-    </div>
+                    <div className="w-full flex justify-center overflow-visible">
+                        <TextHoverEffect text="SpendMate" />
+                    </div>
 
-    <p className="text-sm text-muted-foreground">
-      Track smarter. Spend better.
-    </p>
+                    <p className="text-sm text-muted-foreground">
+                        Track smarter. Spend better.
+                    </p>
 
-    <p className="text-xs text-muted-foreground">
-      © 2025 SpendMate. All rights reserved.
-    </p>
+                    <p className="text-xs text-muted-foreground">
+                        © 2025 SpendMate. All rights reserved.
+                    </p>
 
-  </div>
-</footer>
+                </div>
+            </footer>
 
 
         </div>
