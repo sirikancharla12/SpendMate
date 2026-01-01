@@ -1,19 +1,73 @@
-# SpendMate
+# SpendMate – Personal Expense and Budget Tracker
 
-SpendMate is a full-stack expense tracking application designed to help users efficiently manage their finances. With SpendMate, users can log expenses, categorize spending, and gain insights into their financial habits.
+SpendMate is a full-stack web application that helps users track expenses, manage budgets, and analyze their spending patterns through a clean, secure, and responsive interface.
+
+Live Application:  
+https://spend-mate.vercel.app
+
+
+## Overview
+
+SpendMate is designed to simplify personal finance management by allowing users to record transactions, set budgets, and visualize their financial data. The application focuses on performance, usability, and security using modern web technologies.
+
+---
 
 ## Features
-- **Expense Tracking**: Add, edit, and delete expenses with ease.
-- **Budget Management**: Set budgets and track spending against them.
-- **Data Visualization**: View expenses through interactive charts and graphs.
-- **User Authentication**: Secure login and signup with Google OAuth and NextAuth.
-- **Database Integration**: Stores financial data securely in PostgreSQL.
+
+### Authentication
+- Secure user authentication using Google OAuth
+- Session management with NextAuth
+- Protected routes for authenticated users
+
+### Expense Tracking
+- Add, edit, and delete expenses
+- Categorize expenses and income
+- Date-based transaction history
+
+### Budget Management
+- Create monthly budgets
+- Track expenses against budget limits
+- Visual indicators for overspending
+
+### Analytics and Insights
+- Interactive charts for income and expenses
+- Category-wise spending analysis
+- Monthly and yearly financial trends
+
+### User Interface
+- Fully responsive design
+- Modern UI with smooth animations
+- Optimized dashboard layout for clarity
+
+---
 
 ## Tech Stack
-- **Frontend**: Next.js
-- **Backend**: Next.js (API Routes)
-- **Database**: PostgreSQL (NeonDB)
-- **Authentication**: NextAuth (Google OAuth)
+
+### Frontend
+- Next.js (App Router)
+- React 18
+- Tailwind CSS
+- Framer Motion
+- Chart.js
+
+### Backend
+- Next.js API Routes
+- NextAuth.js
+
+### Database
+- PostgreSQL
+- Prisma ORM
+- NeonDB (Serverless PostgreSQL)
+
+### Authentication
+- Google OAuth
+- NextAuth.js
+
+### Deployment
+- Vercel
+
+---
+
 
 ## Installation
 Follow these steps to set up SpendMate locally:
