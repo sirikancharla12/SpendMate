@@ -4,10 +4,9 @@
 import dynamic from "next/dynamic";
 
 const TextHoverEffect = dynamic(
-    () => import("components/ui/text-hover-effect").then(mod => mod.TextHoverEffect),
-    { ssr: false }
+  () => import("components/ui/text-hover-effect"),
+  { ssr: false }
 );
-
 
 import { useState } from "react";
 import Link from "next/link";
