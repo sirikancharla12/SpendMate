@@ -1,7 +1,13 @@
 "use client";
 
 
-export const dynamic = "force-dynamic";
+import dynamic from "next/dynamic";
+
+const TextHoverEffect = dynamic(
+  () => import("components/ui/text-hover-effect").then(mod => mod.TextHoverEffect),
+  { ssr: false }
+);
+
 
 import { useState } from "react";
 import Link from "next/link";
@@ -17,7 +23,6 @@ import {
     CheckCircle2
 } from "lucide-react";
 import Image from "next/image";
-import { TextHoverEffect } from "components/ui/text-hover-effect";
 
 const faqs = [
     {
